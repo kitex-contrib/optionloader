@@ -1,0 +1,58 @@
+#ClientBasicInfo
+ClientBasicInfo:
+  ServiceName: "your_service_name"
+  Method: "your_method"
+  Tags:
+    tag1: "value1"
+    tag2: "value2"
+
+#port
+hostports: 8888
+
+#DestService
+DestService: "your_dest_service"
+
+#protocol
+protocol: "HTTP"
+
+#Connection
+Connection:
+  method: "LongConnection"
+  ShortConnection:
+  LongConnection:
+    MinIdlePerAddress: 1
+#    MaxIdlePerAddress: 10
+    MaxIdleGlobal: 100
+    MaxIdleTimeout: "1m"
+  MuxConnection:
+    connNum: 3
+
+timeout:
+  "*":
+    conn_timeout_ms: -1
+    rpc_timeout_ms: -1
+circuitbreaker:
+  Echo:
+    enable: true
+    err_rate: 0.1
+    min_sample: 100
+retry:
+  "*":
+    enable: true
+    type: 0
+    failure_policy:
+      stop_policy:
+        max_retry_times: 3
+        max_duration_ms: 2000
+        cb_policy:
+          error_rate: 0.2
+  Echo:
+    enable: true
+    type: 1
+    backup_policy:
+      retry_delay_ms: 200
+      stop_policy:
+        max_retry_times: 2
+        max_duration_ms: 1000
+        cb_policy:
+          error_rate: 0.3

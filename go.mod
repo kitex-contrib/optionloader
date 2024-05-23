@@ -2,7 +2,10 @@ module github.com/Printemps417/optionloader
 
 go 1.21.6
 
-require github.com/cloudwego/kitex v0.9.1
+require (
+	github.com/cloudwego/kitex v0.9.1
+	gopkg.in/yaml.v2 v2.3.0
+)
 
 require (
 	github.com/apache/thrift v0.13.0 // indirect

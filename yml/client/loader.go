@@ -18,7 +18,7 @@ type Loader interface {
 }
 
 type clientLoader struct {
-	configSources []ymlreader
+	configSources []ymlReader
 	options       []kitexclient.Option
 	translators   map[string]clientTranslator
 }
