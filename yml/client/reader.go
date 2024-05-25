@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"gopkg.in/yaml.v2"
+	"reflect"
 )
 
 // decoder可选为用户自定义，以支持多种配置文件
@@ -44,6 +45,17 @@ func (y *ymlReader) ReadToConfig(data []byte) error {
 
 func (y *ymlReader) GetConfig() (YMLConfig, error) {
 	return y.config, nil
+}
+
+func (y *ymlReader) GetConfigByField(field string) (interface{}, error) {
+	r := reflect.ValueOf(y.config)
+	f := r.FieldByName(field)
+
+	if !f.IsValid() {
+		return nil, errors.New("field not found")
+	}
+
+	return f.Interface(), nil
 }
 
 // Default decoder
