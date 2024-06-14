@@ -74,21 +74,14 @@ func (l *clientLoader) AddDefaultOptions(opts []kitexclient.Option) {
 		l.options = append(l.options, opt)
 	}
 }
-func portTranslator(p port) ([]kitexclient.Option, error) {
-	res := []kitexclient.Option{}
-	s := string(p)
-	res = append(res, kitexclient.WithHostPorts(s))
-	return res, nil
-}
+
 func NewClientLoader() (*clientLoader, error) {
 	loader := &clientLoader{
 		translators: make(map[string]clientTranslator),
 	}
-
 	err := loader.RegisterTranslator("port", portTranslator)
 	if err != nil {
 		return nil, err
 	}
-
 	return loader, nil
 }

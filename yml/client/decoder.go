@@ -15,8 +15,9 @@ type EndpointBasicInfo struct {
 	Tags        map[string]string `yaml:"Tags"`
 }
 
-type port int
-type Protocol string
+type port string
+
+type protocol string
 type DestService string
 
 // IdleConfig contains idle configuration for long-connection pool.
