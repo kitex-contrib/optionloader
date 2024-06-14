@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/cloudwego/kitex v0.9.1
+	go.uber.org/zap v1.27.0
 	gopkg.in/yaml.v2 v2.3.0
 )
 
@@ -39,6 +40,7 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.2.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
