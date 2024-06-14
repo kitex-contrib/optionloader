@@ -79,9 +79,22 @@ func NewClientLoader() (*clientLoader, error) {
 	loader := &clientLoader{
 		translators: make(map[string]clientTranslator),
 	}
-	err := loader.RegisterTranslator("port", portTranslator)
-	if err != nil {
-		return nil, err
+
+	// Register all translators
+	translators := map[string]clientTranslator{
+		"ClientBasicInfo": basicinfoTranslator,
+		"HostPorts":       HostPortsTranslator,
+		"DestService":     DestServiceTranslator,
+		"Protocol":        protocolTranslator,
+		"Connection":      connectionTranslator,
 	}
+
+	for fieldName, translator := range translators {
+		err := loader.RegisterTranslator(fieldName, translator)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return loader, nil
 }

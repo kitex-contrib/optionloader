@@ -47,9 +47,9 @@ type RetryPolicy retry.Policy
 type Circuitbreaker circuitbreak.CBConfig
 type YMLConfig struct {
 	ClientBasicInfo EndpointBasicInfo `yaml:"ClientBasicInfo"`
-	HostPorts       int               `yaml:"hostports"`
+	HostPorts       int               `yaml:"HostPorts"`
 	DestService     string            `yaml:"DestService"`
-	Protocol        string            `yaml:"protocol"`
+	Protocol        string            `yaml:"Protocol"`
 	Connection      Connection        `yaml:"Connection"`
 }
 

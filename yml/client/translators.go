@@ -10,25 +10,6 @@ import (
 	"strings"
 )
 
-func portTranslator(p interface{}) ([]kitexclient.Option, error) {
-	res := []kitexclient.Option{}
-	str, _ := p.(string)
-
-	// Split the string by comma for multiple ports
-	ports := strings.Split(str, ",")
-	for _, port := range ports {
-		// Split the string by colon for host:port format
-		hostPort := strings.Split(port, ":")
-		portNum, err := strconv.Atoi(hostPort[len(hostPort)-1])
-		if err != nil || portNum < 1 || portNum > 65535 {
-			return nil, fmt.Errorf("invalid port number: %s", port)
-		}
-	}
-
-	res = append(res, kitexclient.WithHostPorts(str))
-	return res, nil
-}
-
 // Protocol indicates the transport protocol.
 type Protocol int
 
@@ -86,7 +67,7 @@ func protocolTranslator(p interface{}) ([]kitexclient.Option, error) {
 	}
 	return res, nil
 }
-func withDestServiceTranslator(p interface{}) ([]kitexclient.Option, error) {
+func DestServiceTranslator(p interface{}) ([]kitexclient.Option, error) {
 	res := []kitexclient.Option{}
 	str, ok := p.(string)
 	if !ok {
@@ -96,15 +77,22 @@ func withDestServiceTranslator(p interface{}) ([]kitexclient.Option, error) {
 	return res, nil
 }
 
-func withHostPortsTranslator(p interface{}) ([]kitexclient.Option, error) {
+func HostPortsTranslator(p interface{}) ([]kitexclient.Option, error) {
 	res := []kitexclient.Option{}
-	str, ok := p.(string)
-	if !ok {
-		return nil, fmt.Errorf("HostPorts should be a string")
+	str, _ := p.(string)
+
+	// Split the string by comma for multiple ports
+	ports := strings.Split(str, ",")
+	for _, port := range ports {
+		// Split the string by colon for host:port format
+		hostPort := strings.Split(port, ":")
+		portNum, err := strconv.Atoi(hostPort[len(hostPort)-1])
+		if err != nil || portNum < 1 || portNum > 65535 {
+			return nil, fmt.Errorf("invalid port number: %s", port)
+		}
 	}
-	// Split the string by comma for multiple hostports
-	hostports := strings.Split(str, ",")
-	res = append(res, kitexclient.WithHostPorts(hostports...))
+
+	res = append(res, kitexclient.WithHostPorts(str))
 	return res, nil
 }
 func connectionTranslator(p interface{}) ([]kitexclient.Option, error) {

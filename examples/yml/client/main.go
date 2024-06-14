@@ -8,6 +8,7 @@ import (
 
 func main() {
 	utils.Printpath()
+	println("Client")
 	myreader := ymlclient.NewReader("./client.yml")
 	cfg, err := myreader.GetConfig()
 	if err != nil {
