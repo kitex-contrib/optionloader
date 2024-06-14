@@ -13,7 +13,7 @@ HostPorts: "8888"
 DestService: "your_dest_service"
 
 #protocol
-Protocol: 8
+Protocol: "HTTP"
 
 #Connection
 Connection:
@@ -21,7 +21,7 @@ Connection:
   ShortConnection:
   LongConnection:
     MinIdlePerAddress: 1
-#    MaxIdlePerAddress: 10
+    MaxIdlePerAddress: 10
     MaxIdleGlobal: 100
     MaxIdleTimeout: "1m"
   MuxConnection:

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	kitexclient "github.com/cloudwego/kitex/client"
 )
 
@@ -18,26 +19,28 @@ type Loader interface {
 }
 
 type clientLoader struct {
-	configSource ymlReader
+	configSource *ymlReader
 	options      []kitexclient.Option
 	translators  map[string]clientTranslator
 }
 
-func (loader *clientLoader) SetSource(reader ymlReader) error {
+func (loader *clientLoader) SetSource(reader *ymlReader) error {
 	loader.configSource = reader
 	return nil
 }
 func (loader *clientLoader) Load() error {
 	for field, translator := range loader.translators {
 		// 通过字段名获取字段值
+		//println(field, translator)
 		fieldConfig, err := loader.configSource.GetConfigByField(field)
+		fmt.Printf("FieldConfig for %s: %+v\n", field, fieldConfig)
 		if err != nil {
-			return err
+			continue
 		}
 		// 通过字段名获取选项
 		opts, err := translator(fieldConfig)
 		if err != nil {
-			return err
+			continue
 		}
 		loader.options = append(loader.options, opts...)
 	}
@@ -45,7 +48,7 @@ func (loader *clientLoader) Load() error {
 }
 
 // 实现 Loader 接口的 GetOptions 方法。
-func (l *clientLoader) GetOptions() (interface{}, error) {
+func (l *clientLoader) GetOptions() ([]kitexclient.Option, error) {
 	// 返回当前的 options
 	return l.options, nil
 }
