@@ -6,59 +6,62 @@ import (
 	"time"
 )
 
-// ConfigParser the parser for etcd config.
 type ConfigParser interface {
-	Decode(data string, config interface{}) error
+	Decode(data []byte, config EtcdConfig) error
 }
 
-type parser struct{}
+type defaultParser struct {
+}
 
-// Decode decodes the data to struct in specified format.
-func (p *parser) defaultDecoder(data string, config interface{}) error {
-	return json.Unmarshal([]byte(data), config)
+func (p *defaultParser) Decode(data []byte, config EtcdConfig) error {
+	return json.Unmarshal(data, &config)
 }
 
 type Config interface {
-	ToString() string
+	String() string
 }
 
-type etcdConfig struct {
-	ClientBasicInfo EndpointBasicInfo `yaml:"ClientBasicInfo"`
-	HostPorts       int               `yaml:"hostports"`
-	DestService     string            `yaml:"DestService"`
-	Protocol        string            `yaml:"protocol"`
-	Connection      Connection        `yaml:"Connection"`
+type EtcdConfig struct {
+	ClientBasicInfo *EndpointBasicInfo `mapstructure:"ClientBasicInfo"`
+	HostPorts       *string            `mapstructure:"Hostports"`
+	DestService     *string            `mapstructure:"DestService"`
+	Protocol        *string            `mapstructure:"Protocol"`
+	Connection      *Connection        `mapstructure:"Connection"`
+	MyConfig        Config             `mapstructure:"MyConfig"`
 }
 
-func (c *etcdConfig) ToString() string {
+func (c *EtcdConfig) String() string {
+	baseInfo := "nil"
+	if c.MyConfig != nil {
+		baseInfo = c.MyConfig.String()
+	}
 	return fmt.Sprintf("ClientBasicInfo: %v\n"+
-		" HostPorts: %d\n"+
+		" HostPorts: %s\n"+
 		" DestService: %s\n"+
 		" Protocol: %s\n"+
-		" Connection: %v\n",
-		c.ClientBasicInfo, c.HostPorts, c.DestService, c.Protocol, c.Connection)
+		" Connection: %v\n"+
+		" MyConfig: %s\n",
+		*c.ClientBasicInfo, *c.HostPorts, *c.DestService, *c.Protocol, *c.Connection, baseInfo)
 }
 
-// EndpointBasicInfo should be immutable after created.
 type EndpointBasicInfo struct {
-	ServiceName string            `yaml:"ServiceName"`
-	Method      string            `yaml:"Method"`
-	Tags        map[string]string `yaml:"Tags"`
+	ServiceName string            `mapstructure:"ServiceName"`
+	Method      string            `mapstructure:"Method"`
+	Tags        map[string]string `mapstructure:"Tags"`
 }
 
-// IdleConfig contains idle configuration for long-connection pool.
 type IdleConfig struct {
-	MinIdlePerAddress int           `yaml:"MinIdlePerAddress"`
-	MaxIdlePerAddress int           `yaml:"MaxIdlePerAddress"`
-	MaxIdleGlobal     int           `yaml:"MaxIdleGlobal"`
-	MaxIdleTimeout    time.Duration `yaml:"MaxIdleTimeout"`
+	MinIdlePerAddress int           `mapstructure:"MinIdlePerAddress"`
+	MaxIdlePerAddress int           `mapstructure:"MaxIdlePerAddress"`
+	MaxIdleGlobal     int           `mapstructure:"MaxIdleGlobal"`
+	MaxIdleTimeout    time.Duration `mapstructure:"MaxIdleTimeout"`
 }
 type MuxConnection struct {
-	ConnNum int `yaml:"connNum"`
+	ConnNum int `json:"connNum"`
 }
 
 type Connection struct {
-	Method         string        `yaml:"method"`
-	LongConnection IdleConfig    `yaml:"LongConnection"`
-	MuxConnection  MuxConnection `yaml:"MuxConnection"`
+	Method         string        `mapstructure:"Method"`
+	LongConnection IdleConfig    `mapstructure:"LongConnection"`
+	MuxConnection  MuxConnection `mapstructure:"MuxConnection"`
 }
