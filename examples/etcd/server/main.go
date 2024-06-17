@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	serverServiceName = "serverServiceName"
+	serverServiceName = "echo_server_service"
 )
 
 var _ api.Echo = &EchoImpl{}
@@ -53,8 +53,8 @@ func myTranslator(config *etcdServer.EtcdConfig) ([]kitexserver.Option, error) {
 	c := config.MyConfig
 	var opts []kitexserver.Option
 	//具体处理逻辑
-	_ = c
 	_ = opts
+	fmt.Println("myConfigTranslator run! myConfig:" + c.String())
 	return opts, nil
 }
 
@@ -81,6 +81,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+	fmt.Println("Options: ", loader.GetSuite().Options())
 	server := echo.NewServer(
 		new(EchoImpl),
 		kitexserver.WithSuite(loader.GetSuite()),

@@ -6,8 +6,6 @@ import (
 	"github.com/cloudwego/kitex/pkg/connpool"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/transport"
-	"strconv"
-	"strings"
 )
 
 // Protocol indicates the transport protocol.
@@ -68,17 +66,7 @@ func destServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 func hostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.HostPorts
 	var res []kitexclient.Option
-
-	ports := strings.Split(*c, ",")
-	for _, port := range ports {
-		hostPort := strings.Split(port, ":")
-		portNum, err := strconv.Atoi(hostPort[len(hostPort)-1])
-		if err != nil || portNum < 1 || portNum > 65535 {
-			return nil, fmt.Errorf("invalid port number: %s", port)
-		}
-	}
-
-	res = append(res, kitexclient.WithHostPorts(*c))
+	res = append(res, kitexclient.WithHostPorts(c...))
 	return res, nil
 }
 func connectionTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {

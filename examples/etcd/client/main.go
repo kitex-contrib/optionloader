@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	serverServiceName = "serverServiceName"
-	clientServiceName = "clientServiceName"
+	serverServiceName = "echo_server_service"
+	clientServiceName = "echo_client_service"
 )
 
 // 用户可以自定义读取数据的类型，要求通过Decode返回一个字节流
@@ -29,14 +29,14 @@ func (p *myConfigParser) Decode(data []byte, config etcdClient.EtcdConfig) error
 
 // 用户可以自定义新增Config文件结构，并且默认的的Config文件结构仍然存在
 type myConfig struct {
-	configOne *string `mapstructure:"configOne"`
-	configTwo *string `mapstructure:"configTwo"`
+	configOne *string  `mapstructure:"configOne"`
+	configTwo []string `mapstructure:"configTwo"`
 }
 
 func (r *myConfig) String() string {
 	return fmt.Sprintf(
 		"configOne: %s\n"+
-			"configTwo: %s\n", *r.configOne, *r.configTwo)
+			"configTwo: %s\n", *r.configOne, r.configTwo)
 }
 
 // 用户可自定义Translator，用于将myConfig解析成Options
@@ -44,8 +44,8 @@ func myTranslator(config *etcdClient.EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.MyConfig
 	opts := []kitexclient.Option{}
 	//具体处理逻辑
-	_ = c
 	_ = opts
+	fmt.Println("myConfigTranslator run! myConfig:" + c.String())
 	return opts, nil
 }
 
@@ -72,6 +72,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+	fmt.Println("Options: ", loader.GetSuite().Options())
 	client, err := echo.NewClient(
 		serverServiceName,
 		kitexclient.WithSuite(loader.GetSuite()),

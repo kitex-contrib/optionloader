@@ -23,7 +23,7 @@ type Config interface {
 
 type EtcdConfig struct {
 	ClientBasicInfo *EndpointBasicInfo `mapstructure:"ClientBasicInfo"`
-	HostPorts       *string            `mapstructure:"HostPorts"`
+	HostPorts       []string           `mapstructure:"HostPorts"`
 	DestService     *string            `mapstructure:"DestService"`
 	Protocol        *string            `mapstructure:"Protocol"`
 	Connection      *Connection        `mapstructure:"Connection"`
@@ -41,7 +41,7 @@ func (c *EtcdConfig) String() string {
 		" Protocol: %s\n"+
 		" Connection: %v\n"+
 		" MyConfig: %s\n",
-		*c.ClientBasicInfo, *c.HostPorts, *c.DestService, *c.Protocol, *c.Connection, baseInfo)
+		*c.ClientBasicInfo, c.HostPorts, *c.DestService, *c.Protocol, *c.Connection, baseInfo)
 }
 
 type EndpointBasicInfo struct {
