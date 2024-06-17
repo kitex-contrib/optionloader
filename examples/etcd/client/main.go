@@ -72,10 +72,9 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	opts, err := loader.GetOptions()
 	client, err := echo.NewClient(
 		serverServiceName,
-		opts...,
+		kitexclient.WithSuite(loader.GetSuite()),
 	)
 	if err != nil {
 		log.Fatal(err)
