@@ -36,9 +36,9 @@ var protocolMap = map[string]Protocol{
 	"TTHeaderFramed": TTHeaderFramed,
 }
 
-func basicinfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func basicInfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.ClientBasicInfo
-	res := []kitexclient.Option{}
+	var res []kitexclient.Option
 	rpcInfo := rpcinfo.EndpointBasicInfo{
 		ServiceName: c.ServiceName,
 		Method:      c.Method,
@@ -49,7 +49,7 @@ func basicinfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 }
 func protocolTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.Protocol
-	res := []kitexclient.Option{}
+	var res []kitexclient.Option
 	protocol, ok := protocolMap[*c]
 	if !ok {
 		return nil, fmt.Errorf("unknown protocol: %s", *c)
@@ -58,16 +58,16 @@ func protocolTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 
 	return res, nil
 }
-func DestServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func destServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.DestService
-	res := []kitexclient.Option{}
+	var res []kitexclient.Option
 	res = append(res, kitexclient.WithDestService(*c))
 	return res, nil
 }
 
-func HostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func hostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.HostPorts
-	res := []kitexclient.Option{}
+	var res []kitexclient.Option
 
 	ports := strings.Split(*c, ",")
 	for _, port := range ports {
@@ -83,7 +83,7 @@ func HostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 }
 func connectionTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.Connection
-	res := []kitexclient.Option{}
+	var res []kitexclient.Option
 
 	switch c.Method {
 	case "ShortConnection":
