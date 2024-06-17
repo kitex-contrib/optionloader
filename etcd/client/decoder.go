@@ -1,4 +1,4 @@
-package client
+package etcdclient
 
 import (
 	"encoding/json"

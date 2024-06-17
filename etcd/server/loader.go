@@ -1,4 +1,4 @@
-package server
+package etcdserver
 
 import (
 	"github.com/cloudwego/kitex/pkg/klog"

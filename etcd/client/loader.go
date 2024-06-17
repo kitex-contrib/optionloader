@@ -1,4 +1,4 @@
-package client
+package etcdclient
 
 import (
 	kitexclient "github.com/cloudwego/kitex/client"

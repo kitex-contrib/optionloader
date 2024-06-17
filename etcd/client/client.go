@@ -1,4 +1,4 @@
-package client
+package etcdclient
 
 import (
 	clientv3 "go.etcd.io/etcd/client/v3"
