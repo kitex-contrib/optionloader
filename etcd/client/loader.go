@@ -2,15 +2,14 @@ package client
 
 import (
 	kitexclient "github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type ClientTranslator func(config *EtcdConfig) ([]kitexclient.Option, error)
 
-// interfaces
-// type translator func(config map[string]interface{}) (interface{}, error)
 type Loader interface {
 	Load() error
-	GetOptions() ([]kitexclient.Option, error)
+	GetSuite() EtcdClientSuite
 }
 
 type EtcdLoader struct {
@@ -19,6 +18,7 @@ type EtcdLoader struct {
 	translators       []ClientTranslator
 	ClientServiceName string
 	ServerServiceName string
+	suite             *EtcdClientSuite
 }
 
 func (l *EtcdLoader) Load() error {
@@ -27,18 +27,20 @@ func (l *EtcdLoader) Load() error {
 		return err
 	}
 	for _, translator := range l.translators {
-		// 通过字段名获取选项
 		opts, err := translator(config)
 		if err != nil {
+			klog.Errorf(err.Error())
 			continue
 		}
 		l.options = append(l.options, opts...)
 	}
+	l.suite = &EtcdClientSuite{
+		opts: l.options,
+	}
 	return nil
 }
 
-// 实现 Loader 接口的 GetOptions 方法。
-func (l *EtcdLoader) GetOptions() ([]kitexclient.Option, error) {
+func (l *EtcdLoader) GetSuite() *EtcdClientSuite {
 	// 返回当前的 options
-	return l.options, nil
+	return l.suite
 }
