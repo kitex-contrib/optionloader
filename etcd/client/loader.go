@@ -5,7 +5,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-type ClientTranslator func(config *EtcdConfig) ([]kitexclient.Option, error)
+type Translator func(config *EtcdConfig) ([]kitexclient.Option, error)
 
 type Loader interface {
 	Load() error
@@ -15,7 +15,7 @@ type Loader interface {
 type EtcdLoader struct {
 	reader            *EtcdReader
 	options           []kitexclient.Option
-	translators       []ClientTranslator
+	translators       []Translator
 	ClientServiceName string
 	ServerServiceName string
 	suite             *EtcdClientSuite

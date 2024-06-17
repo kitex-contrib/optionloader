@@ -23,7 +23,7 @@ type Config interface {
 
 type EtcdConfig struct {
 	ClientBasicInfo *EndpointBasicInfo `mapstructure:"ClientBasicInfo"`
-	HostPorts       *string            `mapstructure:"Hostports"`
+	HostPorts       *string            `mapstructure:"HostPorts"`
 	DestService     *string            `mapstructure:"DestService"`
 	Protocol        *string            `mapstructure:"Protocol"`
 	Connection      *Connection        `mapstructure:"Connection"`

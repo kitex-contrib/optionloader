@@ -61,7 +61,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	myTranslators := []etcdClient.ClientTranslator{myTranslator}
+	myTranslators := []etcdClient.Translator{myTranslator}
 	loader, err := etcdClient.NewLoader(clientServiceName, serverServiceName, reader, myTranslators...)
 	if err != nil {
 		log.Fatal(err)

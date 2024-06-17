@@ -57,13 +57,13 @@ func NewReader(opts ReaderOptions) (*EtcdReader, error) {
 	return r, nil
 }
 
-func NewLoader(clientServiceName, serverServiceName string, reader *EtcdReader, myTranslators ...ClientTranslator) (*EtcdLoader, error) {
+func NewLoader(clientServiceName, serverServiceName string, reader *EtcdReader, myTranslators ...Translator) (*EtcdLoader, error) {
 
 	// Register all translators
-	translators := []ClientTranslator{
-		basicinfoTranslator,
-		HostPortsTranslator,
-		DestServiceTranslator,
+	translators := []Translator{
+		basicInfoTranslator,
+		hostPortsTranslator,
+		destServiceTranslator,
 		protocolTranslator,
 		connectionTranslator,
 	}
