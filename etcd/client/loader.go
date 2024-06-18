@@ -1,4 +1,4 @@
-package client
+package etcdclient
 
 import (
 	kitexclient "github.com/cloudwego/kitex/client"
@@ -22,6 +22,11 @@ type EtcdLoader struct {
 }
 
 func (l *EtcdLoader) Load() error {
+	path := Path{ClientServiceName: l.ClientServiceName, ServerServiceName: l.ServerServiceName}
+	err := l.reader.ReadToConfig(&path)
+	if err != nil {
+		return err
+	}
 	config, err := l.reader.GetConfig()
 	if err != nil {
 		return err

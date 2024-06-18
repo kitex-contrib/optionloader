@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"regexp"
+	"strconv"
+	"time"
 )
 
 // PathExists check whether the file or directory exists
@@ -25,4 +28,35 @@ func Printpath() {
 		return
 	}
 	fmt.Println("Current directory:", dir)
+}
+
+func ParseDuration(s string) (time.Duration, error) {
+	// 定义一个正则表达式来匹配时间量和单位
+	// 假设时间量是一个整数，单位可以是 s(秒), m(分钟), h(小时) 等
+	re := regexp.MustCompile(`^(\d+)([smh])$`)
+	matches := re.FindStringSubmatch(s)
+	if matches == nil || len(matches) != 3 {
+		return 0, fmt.Errorf("invalid duration format: %s", s)
+	}
+
+	// 将时间量从字符串转换为整数
+	amount, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return 0, fmt.Errorf("invalid duration amount: %s", matches[1])
+	}
+
+	// 根据单位计算纳秒数
+	var duration time.Duration
+	switch matches[2] {
+	case "s":
+		duration = time.Duration(amount) * time.Second
+	case "m":
+		duration = time.Duration(amount) * time.Minute
+	case "h":
+		duration = time.Duration(amount) * time.Hour
+	default:
+		return 0, fmt.Errorf("unsupported duration unit: %s", matches[2])
+	}
+
+	return duration, nil
 }

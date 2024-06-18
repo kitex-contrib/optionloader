@@ -1,8 +1,7 @@
-package server
+package etcdserver
 
 import (
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.uber.org/zap"
 	"text/template"
 	"time"
 )
@@ -13,7 +12,6 @@ type ReaderOptions struct {
 	Prefix       string
 	PathFormat   string
 	Timeout      time.Duration
-	LoggerConfig *zap.Config
 	ConfigParser ConfigParser
 	MyConfig     Config
 }
@@ -35,8 +33,8 @@ func NewReader(opts ReaderOptions) (*EtcdReader, error) {
 		opts.PathFormat = EtcdServerDefaultPath
 	}
 	etcdClient, err := clientv3.New(clientv3.Config{
-		Endpoints: opts.Node,
-		LogConfig: opts.LoggerConfig,
+		Endpoints:   opts.Node,
+		DialTimeout: opts.Timeout,
 	})
 	if err != nil {
 		return nil, err

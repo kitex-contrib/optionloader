@@ -1,4 +1,4 @@
-package server
+package etcdserver
 
 import (
 	"encoding/json"
@@ -6,14 +6,14 @@ import (
 )
 
 type ConfigParser interface {
-	Decode(data []byte, config EtcdConfig) error
+	Decode(data []byte, config *EtcdConfig) error
 }
 
 type defaultParser struct {
 }
 
-func (p *defaultParser) Decode(data []byte, config EtcdConfig) error {
-	return json.Unmarshal(data, &config)
+func (p *defaultParser) Decode(data []byte, config *EtcdConfig) error {
+	return json.Unmarshal(data, config)
 }
 
 type Config interface {
