@@ -45,6 +45,9 @@ func (r *myConfig) String() string {
 // 用户可自定义Translator，用于将myConfig解析成Options
 func myTranslator(config *etcdClient.EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.MyConfig
+	if c == nil {
+		return nil, nil
+	}
 	opts := []kitexclient.Option{}
 	//具体处理逻辑
 	_ = opts
