@@ -3,6 +3,7 @@ package etcdserver
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type ConfigParser interface {
@@ -28,16 +29,20 @@ type EtcdConfig struct {
 }
 
 func (c *EtcdConfig) String() string {
-	baseInfo := "nil"
-	if c.MyConfig != nil {
-		baseInfo = c.MyConfig.String()
+	var builder strings.Builder
+	if c.ServerBasicInfo != nil {
+		builder.WriteString(fmt.Sprintf("ClientBasicInfo: %v\n", *c.ServerBasicInfo))
 	}
-	return fmt.Sprintf(
-		" ServerBasicInfo: %s\n"+
-			" ServiceAddr: %s\n"+
-			" MuxTransport: %v\n"+
-			" MyConfig: %s\n",
-		*c.ServerBasicInfo, c.ServiceAddr, *c.MuxTransport, baseInfo)
+	if c.ServiceAddr != nil {
+		builder.WriteString(fmt.Sprintf("ServiceAddr: %v\n", c.ServiceAddr))
+	}
+	if c.MuxTransport != nil {
+		builder.WriteString(fmt.Sprintf("MuxTransport: %v\n", *c.MuxTransport))
+	}
+	if c.MyConfig != nil {
+		builder.WriteString(c.MyConfig.String())
+	}
+	return builder.String()
 }
 
 type EndpointBasicInfo struct {
