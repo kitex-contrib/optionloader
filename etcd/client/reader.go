@@ -13,7 +13,7 @@ const (
 	EtcdDefaultNode         = "http://127.0.0.1:2379"
 	EtcdDefaultConfigPrefix = "/KitexConfig"
 	EtcdDefaultTimeout      = 5 * time.Second
-	EtcdClientDefaultPath   = "{{.ClientServiceName}}/{{.ServerServiceName}}"
+	EtcdClientDefaultPath   = "/{{.ClientServiceName}}/{{.ServerServiceName}}"
 )
 
 type Reader interface {
@@ -55,7 +55,7 @@ func (r *EtcdReader) ReadToConfig(p *Path) error {
 		klog.Debugf("[etcd] key: %s config get value failed", key)
 		return err
 	}
-	err = r.parser.Decode(data.Kvs[0].Value, *r.config)
+	err = r.parser.Decode(data.Kvs[0].Value, r.config)
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,9 @@ import (
 
 func basicInfoTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 	c := config.ServerBasicInfo
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexserver.Option
 	rpcInfo := rpcinfo.EndpointBasicInfo{
 		ServiceName: c.ServiceName,
@@ -20,6 +23,9 @@ func basicInfoTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 }
 func serviceAddrTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 	c := config.ServiceAddr
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexserver.Option
 	for _, addr := range c {
 		network := addr.Network
@@ -47,6 +53,9 @@ func serviceAddrTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 }
 func muxTransportTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 	c := config.MuxTransport
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexserver.Option
 	if *c {
 		res = append(res, kitexserver.WithMuxTransport())

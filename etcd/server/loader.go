@@ -21,6 +21,11 @@ type EtcdLoader struct {
 }
 
 func (l *EtcdLoader) Load() error {
+	path := Path{ServerServiceName: l.ServerServiceName}
+	err := l.reader.ReadToConfig(&path)
+	if err != nil {
+		return err
+	}
 	config, err := l.reader.GetConfig()
 	if err != nil {
 		return err

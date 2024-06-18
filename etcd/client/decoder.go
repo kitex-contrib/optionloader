@@ -3,18 +3,18 @@ package etcdclient
 import (
 	"encoding/json"
 	"fmt"
-	"time"
+	"strings"
 )
 
 type ConfigParser interface {
-	Decode(data []byte, config EtcdConfig) error
+	Decode(data []byte, config *EtcdConfig) error
 }
 
 type defaultParser struct {
 }
 
-func (p *defaultParser) Decode(data []byte, config EtcdConfig) error {
-	return json.Unmarshal(data, &config)
+func (p *defaultParser) Decode(data []byte, config *EtcdConfig) error {
+	return json.Unmarshal(data, config)
 }
 
 type Config interface {
@@ -31,17 +31,33 @@ type EtcdConfig struct {
 }
 
 func (c *EtcdConfig) String() string {
-	baseInfo := "nil"
-	if c.MyConfig != nil {
-		baseInfo = c.MyConfig.String()
+	var builder strings.Builder
+
+	if c.ClientBasicInfo != nil {
+		builder.WriteString(fmt.Sprintf("ClientBasicInfo: %v\n", *c.ClientBasicInfo))
 	}
-	return fmt.Sprintf("ClientBasicInfo: %v\n"+
-		" HostPorts: %s\n"+
-		" DestService: %s\n"+
-		" Protocol: %s\n"+
-		" Connection: %v\n"+
-		" MyConfig: %s\n",
-		*c.ClientBasicInfo, c.HostPorts, *c.DestService, *c.Protocol, *c.Connection, baseInfo)
+
+	if c.HostPorts != nil {
+		builder.WriteString(fmt.Sprintf("HostPorts: %v\n", c.HostPorts))
+	}
+
+	if c.DestService != nil {
+		builder.WriteString(fmt.Sprintf("DestService: %v\n", *c.DestService))
+	}
+
+	if c.Protocol != nil {
+		builder.WriteString(fmt.Sprintf("Protocol: %v\n", *c.Protocol))
+	}
+
+	if c.Connection != nil {
+		builder.WriteString(fmt.Sprintf("Connection: %v\n", *c.Connection))
+	}
+
+	if c.MyConfig != nil {
+		builder.WriteString(c.MyConfig.String())
+	}
+
+	return builder.String()
 }
 
 type EndpointBasicInfo struct {
@@ -51,13 +67,13 @@ type EndpointBasicInfo struct {
 }
 
 type IdleConfig struct {
-	MinIdlePerAddress int           `mapstructure:"MinIdlePerAddress"`
-	MaxIdlePerAddress int           `mapstructure:"MaxIdlePerAddress"`
-	MaxIdleGlobal     int           `mapstructure:"MaxIdleGlobal"`
-	MaxIdleTimeout    time.Duration `mapstructure:"MaxIdleTimeout"`
+	MinIdlePerAddress int    `mapstructure:"MinIdlePerAddress"`
+	MaxIdlePerAddress int    `mapstructure:"MaxIdlePerAddress"`
+	MaxIdleGlobal     int    `mapstructure:"MaxIdleGlobal"`
+	MaxIdleTimeout    string `mapstructure:"MaxIdleTimeout"`
 }
 type MuxConnection struct {
-	ConnNum int `json:"connNum"`
+	ConnNum int `mapstructure:"ConnNum"`
 }
 
 type Connection struct {

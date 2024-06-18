@@ -2,6 +2,7 @@ package etcdclient
 
 import (
 	"fmt"
+	"github.com/Printemps417/optionloader/utils"
 	kitexclient "github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/connpool"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -36,6 +37,9 @@ var protocolMap = map[string]Protocol{
 
 func basicInfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.ClientBasicInfo
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexclient.Option
 	rpcInfo := rpcinfo.EndpointBasicInfo{
 		ServiceName: c.ServiceName,
@@ -47,6 +51,9 @@ func basicInfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 }
 func protocolTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.Protocol
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexclient.Option
 	protocol, ok := protocolMap[*c]
 	if !ok {
@@ -58,6 +65,9 @@ func protocolTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 }
 func destServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.DestService
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexclient.Option
 	res = append(res, kitexclient.WithDestService(*c))
 	return res, nil
@@ -65,23 +75,33 @@ func destServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 
 func hostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.HostPorts
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexclient.Option
 	res = append(res, kitexclient.WithHostPorts(c...))
 	return res, nil
 }
 func connectionTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	c := config.Connection
+	if c == nil {
+		return nil, nil
+	}
 	var res []kitexclient.Option
 
 	switch c.Method {
 	case "ShortConnection":
 		res = append(res, kitexclient.WithShortConnection())
 	case "LongConnection":
+		MaxIdleTimeout, err := utils.ParseDuration(c.LongConnection.MaxIdleTimeout)
+		if err != nil {
+			return nil, err
+		}
 		idleConfig := connpool.IdleConfig{
 			MinIdlePerAddress: c.LongConnection.MinIdlePerAddress,
 			MaxIdlePerAddress: c.LongConnection.MaxIdlePerAddress,
 			MaxIdleGlobal:     c.LongConnection.MaxIdleGlobal,
-			MaxIdleTimeout:    c.LongConnection.MaxIdleTimeout,
+			MaxIdleTimeout:    MaxIdleTimeout,
 		}
 		res = append(res, kitexclient.WithLongConnection(idleConfig))
 	case "MuxConnection":
