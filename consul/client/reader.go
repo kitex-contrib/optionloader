@@ -4,32 +4,39 @@ import (
 	"bytes"
 	"context"
 	"github.com/cloudwego/kitex/pkg/klog"
-	ecli "go.etcd.io/etcd/client/v3"
+	"github.com/hashicorp/consul/api"
 	"text/template"
 	"time"
 )
 
+type ConfigType string
+
 const (
-	EtcdDefaultNode         = "http://127.0.0.1:2379"
-	EtcdDefaultConfigPrefix = "/KitexConfig"
-	EtcdDefaultTimeout      = 5 * time.Second
-	EtcdClientDefaultPath   = "/{{.ClientServiceName}}/{{.ServerServiceName}}"
+	JSON                      ConfigType = "json"
+	YAML                      ConfigType = "yaml"
+	ConsulDefaultConfigAddr              = "127.0.0.1:8500"
+	ConsulDefaultConfigPrefix            = "KitexConfig"
+	ConsulDefaultTimeout                 = 5 * time.Second
+	ConsulDefaultDataCenter              = "dc1"
+	ConsulDefaultClientPath              = "/{{.ClientServiceName}}/{{.ServerServiceName}}"
+	ConsulDefaultConfigType              = JSON
 )
 
 type Reader interface {
 	SetDecoder(decoder ConfigParser) error
 	ReadToConfig(p *Path) error
-	GetConfig() (*EtcdConfig, error)
+	GetConfig() (*ConsulConfig, error)
 }
 
-type EtcdReader struct {
-	config             *EtcdConfig  //配置文件读出结果
-	parser             ConfigParser //配置文件解码器
-	etcdClient         *ecli.Client
+type ConsulReader struct {
+	config             *ConsulConfig //配置文件读出结果
+	parser             ConfigParser  //配置文件解码器
+	consulClient       *api.Client
 	clientPathTemplate *template.Template
 	clientPath         string
 	prefix             string
-	etcdTimeout        time.Duration
+	consulTimeout      time.Duration
+	configType         ConfigType
 }
 
 type Path struct {
@@ -37,35 +44,36 @@ type Path struct {
 	ServerServiceName string
 }
 
-func (r *EtcdReader) SetDecoder(decoder ConfigParser) error {
+func (r *ConsulReader) SetDecoder(decoder ConfigParser) error {
 	r.parser = decoder
 	return nil
 }
-func (r *EtcdReader) ReadToConfig(p *Path) error {
+func (r *ConsulReader) ReadToConfig(p *Path) error {
 	var err error
 	r.clientPath, err = r.render(p, r.clientPathTemplate)
 	if err != nil {
 		return err
 	}
 	key := r.prefix + r.clientPath
-	ctx2, cancel := context.WithTimeout(context.Background(), r.etcdTimeout)
+	_, cancel := context.WithTimeout(context.Background(), r.consulTimeout)
 	defer cancel()
-	data, err := r.etcdClient.Get(ctx2, key)
+	kv := r.consulClient.KV()
+	data, _, err := kv.Get(key, nil)
 	if err != nil {
-		klog.Debugf("[etcd] key: %s config get value failed", key)
+		klog.Debugf("[consul] key: %s config get value failed", key)
 		return err
 	}
-	err = r.parser.Decode(data.Kvs[0].Value, r.config)
+	err = r.parser.Decode(r.configType, data.Value, r.config)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (r *EtcdReader) GetConfig() (*EtcdConfig, error) {
+func (r *ConsulReader) GetConfig() (*ConsulConfig, error) {
 	return r.config, nil
 }
 
-func (r *EtcdReader) render(p *Path, t *template.Template) (string, error) {
+func (r *ConsulReader) render(p *Path, t *template.Template) (string, error) {
 	var tpl bytes.Buffer
 	err := t.Execute(&tpl, p)
 	if err != nil {

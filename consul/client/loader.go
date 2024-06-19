@@ -5,23 +5,23 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-type Translator func(config *EtcdConfig) ([]kitexclient.Option, error)
+type Translator func(config *ConsulConfig) ([]kitexclient.Option, error)
 
 type Loader interface {
 	Load() error
-	GetSuite() EtcdClientSuite
+	GetSuite() *ConsulClientSuite
 }
 
-type EtcdLoader struct {
-	reader            *EtcdReader
+type ConsulLoader struct {
+	reader            *ConsulReader
 	options           []kitexclient.Option
 	translators       []Translator
 	ClientServiceName string
 	ServerServiceName string
-	suite             *EtcdClientSuite
+	suite             *ConsulClientSuite
 }
 
-func (l *EtcdLoader) Load() error {
+func (l *ConsulLoader) Load() error {
 	path := Path{ClientServiceName: l.ClientServiceName, ServerServiceName: l.ServerServiceName}
 	err := l.reader.ReadToConfig(&path)
 	if err != nil {
@@ -39,13 +39,13 @@ func (l *EtcdLoader) Load() error {
 		}
 		l.options = append(l.options, opts...)
 	}
-	l.suite = &EtcdClientSuite{
+	l.suite = &ConsulClientSuite{
 		opts: l.options,
 	}
 	return nil
 }
 
-func (l *EtcdLoader) GetSuite() *EtcdClientSuite {
+func (l *ConsulLoader) GetSuite() *ConsulClientSuite {
 	// 返回当前的 options
 	return l.suite
 }

@@ -3,25 +3,33 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"strings"
 )
 
 type ConfigParser interface {
-	Decode(data []byte, config *EtcdConfig) error
+	Decode(configType ConfigType, data []byte, config *ConsulConfig) error
 }
 
 type defaultParser struct {
 }
 
-func (p *defaultParser) Decode(data []byte, config *EtcdConfig) error {
-	return json.Unmarshal(data, config)
+func (p *defaultParser) Decode(configType ConfigType, data []byte, config *ConsulConfig) error {
+	switch configType {
+	case JSON:
+		return json.Unmarshal(data, config)
+	case YAML:
+		return yaml.Unmarshal(data, config)
+	default:
+		return fmt.Errorf("unsupported config data type %s", configType)
+	}
 }
 
 type Config interface {
 	String() string
 }
 
-type EtcdConfig struct {
+type ConsulConfig struct {
 	ClientBasicInfo *EndpointBasicInfo `mapstructure:"ClientBasicInfo"`
 	HostPorts       []string           `mapstructure:"HostPorts"`
 	DestService     *string            `mapstructure:"DestService"`
@@ -30,7 +38,7 @@ type EtcdConfig struct {
 	MyConfig        Config             `mapstructure:"MyConfig"`
 }
 
-func (c *EtcdConfig) String() string {
+func (c *ConsulConfig) String() string {
 	var builder strings.Builder
 
 	if c.ClientBasicInfo != nil {

@@ -35,7 +35,7 @@ var protocolMap = map[string]Protocol{
 	"TTHeaderFramed": TTHeaderFramed,
 }
 
-func basicInfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func basicInfoTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.ClientBasicInfo
 	if c == nil {
 		return nil, nil
@@ -49,7 +49,7 @@ func basicInfoTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithClientBasicInfo(&rpcInfo))
 	return res, nil
 }
-func protocolTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func protocolTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.Protocol
 	if c == nil {
 		return nil, nil
@@ -63,7 +63,7 @@ func protocolTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 
 	return res, nil
 }
-func destServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func destServiceTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.DestService
 	if c == nil {
 		return nil, nil
@@ -73,7 +73,7 @@ func destServiceTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	return res, nil
 }
 
-func hostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func hostPortsTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.HostPorts
 	if c == nil {
 		return nil, nil
@@ -82,7 +82,7 @@ func hostPortsTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithHostPorts(c...))
 	return res, nil
 }
-func connectionTranslator(config *EtcdConfig) ([]kitexclient.Option, error) {
+func connectionTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.Connection
 	if c == nil {
 		return nil, nil

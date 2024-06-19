@@ -9,7 +9,7 @@ type Translator func(config *EtcdConfig) ([]kitexserver.Option, error)
 
 type Loader interface {
 	Load() error
-	GetSuite() EtcdServerSuite
+	GetSuite() *EtcdServerSuite
 }
 
 type EtcdLoader struct {
