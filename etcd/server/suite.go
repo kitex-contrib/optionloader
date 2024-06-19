@@ -1,4 +1,4 @@
-package etcdserver
+package server
 
 import (
 	"github.com/cloudwego/kitex/server"

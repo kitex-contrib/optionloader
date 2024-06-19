@@ -1,4 +1,4 @@
-package etcdserver
+package server
 
 import (
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -39,7 +39,7 @@ func NewReader(opts ReaderOptions) (*EtcdReader, error) {
 	if err != nil {
 		return nil, err
 	}
-	clientPathTemplate, err := template.New("clientName").Parse(opts.PathFormat)
+	serverPathTemplate, err := template.New("serverName").Parse(opts.PathFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func NewReader(opts ReaderOptions) (*EtcdReader, error) {
 		parser:             opts.ConfigParser,                    //配置文件解码器
 		etcdClient:         etcdClient,
 		prefix:             opts.Prefix,
-		clientPathTemplate: clientPathTemplate,
+		serverPathTemplate: serverPathTemplate,
 		etcdTimeout:        opts.Timeout,
 	}
 

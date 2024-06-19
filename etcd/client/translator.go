@@ -1,12 +1,12 @@
-package etcdclient
+package client
 
 import (
 	"fmt"
-	"github.com/Printemps417/optionloader/utils"
 	kitexclient "github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/connpool"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/transport"
+	"github.com/kitex-contrib/optionloader/utils"
 )
 
 // Protocol indicates the transport protocol.

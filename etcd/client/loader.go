@@ -1,4 +1,4 @@
-package etcdclient
+package client
 
 import (
 	kitexclient "github.com/cloudwego/kitex/client"
@@ -9,7 +9,7 @@ type Translator func(config *EtcdConfig) ([]kitexclient.Option, error)
 
 type Loader interface {
 	Load() error
-	GetSuite() EtcdClientSuite
+	GetSuite() *EtcdClientSuite
 }
 
 type EtcdLoader struct {

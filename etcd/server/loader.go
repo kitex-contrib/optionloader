@@ -1,4 +1,4 @@
-package etcdserver
+package server
 
 import (
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -9,7 +9,7 @@ type Translator func(config *EtcdConfig) ([]kitexserver.Option, error)
 
 type Loader interface {
 	Load() error
-	GetSuite() EtcdServerSuite
+	GetSuite() *EtcdServerSuite
 }
 
 type EtcdLoader struct {

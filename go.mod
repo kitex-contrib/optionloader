@@ -1,6 +1,6 @@
-module github.com/Printemps417/optionloader
+module github.com/kitex-contrib/optionloader
 
-go 1.22.1
+go 1.20
 
 require (
 	github.com/cloudwego/kitex v0.10.0

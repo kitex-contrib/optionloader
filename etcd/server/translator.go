@@ -1,4 +1,4 @@
-package etcdserver
+package server
 
 import (
 	"errors"
