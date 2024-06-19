@@ -26,8 +26,8 @@ type EtcdReader struct {
 	config             *EtcdConfig  //配置文件读出结果
 	parser             ConfigParser //配置文件解码器
 	etcdClient         *ecli.Client
-	clientPathTemplate *template.Template
-	clientPath         string
+	serverPathTemplate *template.Template
+	serverPath         string
 	prefix             string
 	etcdTimeout        time.Duration
 }
@@ -42,11 +42,11 @@ func (r *EtcdReader) SetDecoder(decoder ConfigParser) error {
 }
 func (r *EtcdReader) ReadToConfig(p *Path) error {
 	var err error
-	r.clientPath, err = r.render(p, r.clientPathTemplate)
+	r.serverPath, err = r.render(p, r.serverPathTemplate)
 	if err != nil {
 		return err
 	}
-	key := r.prefix + r.clientPath
+	key := r.prefix + r.serverPath
 	ctx2, cancel := context.WithTimeout(context.Background(), r.etcdTimeout)
 	defer cancel()
 	data, err := r.etcdClient.Get(ctx2, key)

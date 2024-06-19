@@ -31,7 +31,7 @@ type EtcdConfig struct {
 func (c *EtcdConfig) String() string {
 	var builder strings.Builder
 	if c.ServerBasicInfo != nil {
-		builder.WriteString(fmt.Sprintf("ClientBasicInfo: %v\n", *c.ServerBasicInfo))
+		builder.WriteString(fmt.Sprintf("ServerBasicInfo: %v\n", *c.ServerBasicInfo))
 	}
 	if c.ServiceAddr != nil {
 		builder.WriteString(fmt.Sprintf("ServiceAddr: %v\n", c.ServiceAddr))

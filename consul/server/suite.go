@@ -4,11 +4,11 @@ import (
 	"github.com/cloudwego/kitex/server"
 )
 
-type EtcdServerSuite struct {
+type ConsulServerSuite struct {
 	opts []server.Option
 }
 
 // Options return a list client.Option
-func (s *EtcdServerSuite) Options() []server.Option {
+func (s *ConsulServerSuite) Options() []server.Option {
 	return s.opts
 }

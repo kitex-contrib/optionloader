@@ -7,7 +7,7 @@ import (
 	"net"
 )
 
-func basicInfoTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
+func basicInfoTranslator(config *ConsulConfig) ([]kitexserver.Option, error) {
 	c := config.ServerBasicInfo
 	if c == nil {
 		return nil, nil
@@ -21,7 +21,7 @@ func basicInfoTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 	res = append(res, kitexserver.WithServerBasicInfo(&rpcInfo))
 	return res, nil
 }
-func serviceAddrTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
+func serviceAddrTranslator(config *ConsulConfig) ([]kitexserver.Option, error) {
 	c := config.ServiceAddr
 	if c == nil {
 		return nil, nil
@@ -51,7 +51,7 @@ func serviceAddrTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
 	}
 	return res, nil
 }
-func muxTransportTranslator(config *EtcdConfig) ([]kitexserver.Option, error) {
+func muxTransportTranslator(config *ConsulConfig) ([]kitexserver.Option, error) {
 	c := config.MuxTransport
 	if c == nil {
 		return nil, nil

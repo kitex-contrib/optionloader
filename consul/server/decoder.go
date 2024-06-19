@@ -3,35 +3,43 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"strings"
 )
 
 type ConfigParser interface {
-	Decode(data []byte, config *EtcdConfig) error
+	Decode(configType ConfigType, data []byte, config *ConsulConfig) error
 }
 
 type defaultParser struct {
 }
 
-func (p *defaultParser) Decode(data []byte, config *EtcdConfig) error {
-	return json.Unmarshal(data, config)
+func (p *defaultParser) Decode(configType ConfigType, data []byte, config *ConsulConfig) error {
+	switch configType {
+	case JSON:
+		return json.Unmarshal(data, config)
+	case YAML:
+		return yaml.Unmarshal(data, config)
+	default:
+		return fmt.Errorf("unsupported config data type %s", configType)
+	}
 }
 
 type Config interface {
 	String() string
 }
 
-type EtcdConfig struct {
+type ConsulConfig struct {
 	ServerBasicInfo *EndpointBasicInfo `mapstructure:"ServerBasicInfo"`
 	ServiceAddr     []Addr             `mapstructure:"ServiceAddr"`
 	MuxTransport    *bool              `mapstructure:"MuxTransport"`
 	MyConfig        Config             `mapstructure:"MyConfig"`
 }
 
-func (c *EtcdConfig) String() string {
+func (c *ConsulConfig) String() string {
 	var builder strings.Builder
 	if c.ServerBasicInfo != nil {
-		builder.WriteString(fmt.Sprintf("ClientBasicInfo: %v\n", *c.ServerBasicInfo))
+		builder.WriteString(fmt.Sprintf("ServerBasicInfo: %v\n", *c.ServerBasicInfo))
 	}
 	if c.ServiceAddr != nil {
 		builder.WriteString(fmt.Sprintf("ServiceAddr: %v\n", c.ServiceAddr))
