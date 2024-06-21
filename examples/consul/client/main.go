@@ -1,18 +1,27 @@
+// Copyright 2024 CloudWeGo Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/cloudwego/kitex-examples/kitex_gen/api"
-	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	kitexclient "github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/klog"
 	consulClient "github.com/kitex-contrib/optionloader/consul/client"
 	"github.com/kitex-contrib/optionloader/utils"
 	"gopkg.in/yaml.v3"
 	"log"
-	"time"
 )
 
 const (
@@ -80,8 +89,10 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	myTranslators := []consulClient.Translator{myTranslator}
-	loader, err := consulClient.NewLoader(clientServiceName, serverServiceName, reader, myTranslators...)
+	loaderOptions := consulClient.LoaderOptions{
+		MyTranslators: []consulClient.Translator{myTranslator},
+	}
+	loader, err := consulClient.NewLoader(clientServiceName, serverServiceName, reader, loaderOptions)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -94,21 +105,5 @@ func main() {
 	fmt.Println("Options: ", loader.GetSuite().Options())
 	config, _ := reader.GetConfig()
 	fmt.Print("Config:", config.String())
-	client, err := echo.NewClient(
-		serverServiceName,
-		kitexclient.WithSuite(loader.GetSuite()),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for {
-		req := &api.Request{Message: "my request"}
-		resp, err := client.Echo(context.Background(), req)
-		if err != nil {
-			klog.Errorf("take request error: %v", err)
-		} else {
-			klog.Infof("receive response %v", resp)
-		}
-		time.Sleep(time.Second * 10)
-	}
+	fmt.Print("Suite", loader.GetSuite())
 }

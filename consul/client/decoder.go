@@ -1,8 +1,23 @@
+// Copyright 2024 CloudWeGo Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package client
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/cloudwego/kitex/pkg/retry"
 	"gopkg.in/yaml.v3"
 	"strings"
 )
@@ -30,12 +45,14 @@ type Config interface {
 }
 
 type ConsulConfig struct {
-	ClientBasicInfo *EndpointBasicInfo `mapstructure:"ClientBasicInfo"`
-	HostPorts       []string           `mapstructure:"HostPorts"`
-	DestService     *string            `mapstructure:"DestService"`
-	Protocol        *string            `mapstructure:"Protocol"`
-	Connection      *Connection        `mapstructure:"Connection"`
-	MyConfig        Config             `mapstructure:"MyConfig"`
+	ClientBasicInfo   *EndpointBasicInfo       `mapstructure:"ClientBasicInfo"`
+	HostPorts         []string                 `mapstructure:"HostPorts"`
+	DestService       *string                  `mapstructure:"DestService"`
+	Protocol          *string                  `mapstructure:"Protocol"`
+	MyConfig          Config                   `mapstructure:"MyConfig"`
+	Connection        *Connection              `mapstructure:"Connection"`
+	FailureRetry      *retry.FailurePolicy     `mapstructure:"FailureRetry"`
+	ShouldResultRetry *retry.ShouldResultRetry `mapstructure:"-"`
 }
 
 func (c *ConsulConfig) String() string {

@@ -1,3 +1,17 @@
+// Copyright 2024 CloudWeGo Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package client
 
 import (
@@ -110,5 +124,24 @@ func connectionTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 		return nil, fmt.Errorf("unsupported connection method: %s", c.Method)
 	}
 
+	return res, nil
+}
+func failureRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.FailureRetry
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	res = append(res, kitexclient.WithFailureRetry(c))
+	return res, nil
+}
+
+func specifiedResultRetry(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.ShouldResultRetry
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	res = append(res, kitexclient.WithSpecifiedResultRetry(c))
 	return res, nil
 }
