@@ -1,30 +1,26 @@
+// Copyright 2024 CloudWeGo Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	kitexclient "github.com/cloudwego/kitex/client"
 	etcdClient "github.com/kitex-contrib/optionloader/etcd/client"
 	"github.com/kitex-contrib/optionloader/utils"
-	examplegen "github.com/zhu-mi-shan/optionloader_example/kitex_gen/example"
-	example "github.com/zhu-mi-shan/optionloader_example/kitex_gen/example/testservice"
-	"log"
 )
-
-// TestServiceImpl implements the last service interface defined in the IDL.
-type TestServiceImpl struct{}
-
-// Test implements the TestServiceImpl interface.
-func (s *TestServiceImpl) Test(ctx context.Context, req *examplegen.Req) (resp *examplegen.Resp, err error) {
-	// TODO: Your code here...
-	resp = &examplegen.Resp{
-		Code: "200",
-		Msg:  "ok",
-	}
-
-	return
-}
 
 const (
 	serverServiceName = "echo_server_service"
@@ -81,34 +77,22 @@ func main() {
 	reader, err := etcdClient.NewReader(readerOptions)
 	//reader, err := etcdClient.NewReader(etcdClient.ReaderOptions{})//使用默认值时的
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	myTranslators := []etcdClient.Translator{myTranslator}
 	loader, err := etcdClient.NewLoader(clientServiceName, serverServiceName, reader, myTranslators...)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	err = loader.Load()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 		return
 	}
 	fmt.Println("Options: ", loader.GetSuite().Options())
 	config, _ := reader.GetConfig()
 	fmt.Print("Config:", config.String())
-	c, err := example.NewClient("echo_server_service", kitexclient.WithSuite(loader.GetSuite()))
-	if err != nil {
-		log.Fatal(err)
-	}
-	req := examplegen.Req{
-		Id: 123,
-	}
-	resp, err := c.Test(context.Background(), &req)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	fmt.Println(resp)
+	fmt.Println("client.WithSuite():", loader.GetSuite())
 }
