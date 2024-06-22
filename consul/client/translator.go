@@ -18,9 +18,11 @@ import (
 	"fmt"
 	kitexclient "github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/connpool"
+	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/transport"
 	"github.com/kitex-contrib/optionloader/utils"
+	"github.com/mitchellh/mapstructure"
 )
 
 // Protocol indicates the transport protocol.
@@ -132,7 +134,12 @@ func failureRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) 
 		return nil, nil
 	}
 	var res []kitexclient.Option
-	res = append(res, kitexclient.WithFailureRetry(c))
+	failurePolicy := &retry.FailurePolicy{}
+	err := mapstructure.Decode(*c, failurePolicy)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, kitexclient.WithFailureRetry(failurePolicy))
 	return res, nil
 }
 
