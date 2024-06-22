@@ -102,7 +102,8 @@ func NewLoader(clientServiceName, serverServiceName string, reader *ConsulReader
 		protocolTranslator,
 		connectionTranslator,
 		failureRetryTranslator,
-		specifiedResultRetry,
+		specifiedResultRetryTranslator,
+		backupRequestTranslator,
 	}
 
 	if len(opts.MyTranslators) != 0 {

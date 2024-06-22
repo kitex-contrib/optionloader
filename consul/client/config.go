@@ -32,36 +32,33 @@ type ConsulConfig struct {
 	Connection        *Connection              `mapstructure:"Connection"`
 	FailureRetry      *FailurePolicy           `mapstructure:"FailureRetry"`
 	ShouldResultRetry *retry.ShouldResultRetry `mapstructure:"-"`
+	BackupRequest     *BackupPolicy            `mapstructure:"BackupRequest"`
 	MyConfig          Config                   `mapstructure:"MyConfig"`
 }
 
 func (c *ConsulConfig) String() string {
 	var builder strings.Builder
-
 	if c.ClientBasicInfo != nil {
 		builder.WriteString(fmt.Sprintf("ClientBasicInfo: %v\n", *c.ClientBasicInfo))
 	}
-
 	if c.HostPorts != nil {
 		builder.WriteString(fmt.Sprintf("HostPorts: %v\n", c.HostPorts))
 	}
-
 	if c.DestService != nil {
 		builder.WriteString(fmt.Sprintf("DestService: %v\n", *c.DestService))
 	}
-
 	if c.Protocol != nil {
 		builder.WriteString(fmt.Sprintf("Protocol: %v\n", *c.Protocol))
 	}
-
 	if c.Connection != nil {
 		builder.WriteString(fmt.Sprintf("Connection: %v\n", *c.Connection))
 	}
-
 	if c.FailureRetry != nil {
 		builder.WriteString(fmt.Sprintf("FailureRetry: %v\n", *c.FailureRetry))
 	}
-
+	if c.BackupRequest != nil {
+		builder.WriteString(fmt.Sprintf("BackupRequest: %v\n", *c.BackupRequest))
+	}
 	if c.MyConfig != nil {
 		builder.WriteString(c.MyConfig.String())
 	}
@@ -117,4 +114,10 @@ type CBPolicy struct {
 type BackOffPolicy struct {
 	BackOffType BackOffType               `mapstructure:"BackOffType"`
 	CfgItems    map[BackOffCfgKey]float64 `mapstructure:"CfgItems"`
+}
+
+type BackupPolicy struct {
+	RetryDelayMS  uint32     `mapstructure:"RetryDelayMS"`
+	StopPolicy    StopPolicy `mapstructure:"StopPolicy"`
+	RetrySameNode bool       `mapstructure:"RetrySameNode"`
 }

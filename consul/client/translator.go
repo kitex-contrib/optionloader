@@ -142,13 +142,26 @@ func failureRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) 
 	res = append(res, kitexclient.WithFailureRetry(failurePolicy))
 	return res, nil
 }
-
-func specifiedResultRetry(config *ConsulConfig) ([]kitexclient.Option, error) {
+func specifiedResultRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.ShouldResultRetry
 	if c == nil {
 		return nil, nil
 	}
 	var res []kitexclient.Option
 	res = append(res, kitexclient.WithSpecifiedResultRetry(c))
+	return res, nil
+}
+func backupRequestTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.BackupRequest
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	backupPolicy := &retry.BackupPolicy{}
+	err := mapstructure.Decode(*c, backupPolicy)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, kitexclient.WithBackupRequest(backupPolicy))
 	return res, nil
 }
