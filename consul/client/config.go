@@ -17,6 +17,7 @@ package client
 import (
 	"fmt"
 	"github.com/cloudwego/kitex/pkg/retry"
+	"github.com/cloudwego/kitex/pkg/stats"
 	"strings"
 )
 
@@ -33,6 +34,11 @@ type ConsulConfig struct {
 	FailureRetry      *FailurePolicy           `mapstructure:"FailureRetry"`
 	ShouldResultRetry *retry.ShouldResultRetry `mapstructure:"-"`
 	BackupRequest     *BackupPolicy            `mapstructure:"BackupRequest"`
+	RPCTimeout        *string                  `mapstructure:"RPCTimeout"`
+	ConnectionTimeout *string                  `mapstructure:"ConnectionTimeout"`
+	Tags              []Tag                    `mapstructure:"Tags"`
+	StatsLevel        *stats.Level             `mapstructure:"StatsLevel"`
+	GRPC              *Grpc                    `mapstructure:"GRPC"`
 	MyConfig          Config                   `mapstructure:"MyConfig"`
 }
 
@@ -81,6 +87,7 @@ type IdleConfig struct {
 	MaxIdleGlobal     int    `mapstructure:"MaxIdleGlobal"`
 	MaxIdleTimeout    string `mapstructure:"MaxIdleTimeout"`
 }
+
 type MuxConnection struct {
 	ConnNum int `mapstructure:"ConnNum"`
 }
@@ -120,4 +127,25 @@ type BackupPolicy struct {
 	RetryDelayMS  uint32     `mapstructure:"RetryDelayMS"`
 	StopPolicy    StopPolicy `mapstructure:"StopPolicy"`
 	RetrySameNode bool       `mapstructure:"RetrySameNode"`
+}
+
+type Tag struct {
+	Key   string `mapstructure:"Key"`
+	Value string `mapstructure:"Value"`
+}
+
+type Grpc struct {
+	GRPCConnPoolSize          *uint32              `mapstructure:"GRPCConnPoolSize"`
+	GRPCWriteBufferSize       *uint32              `mapstructure:"GRPCWriteBufferSize"`
+	GRPCReadBufferSize        *uint32              `mapstructure:"GRPCReadBufferSize"`
+	GRPCInitialWindowSize     *uint32              `mapstructure:"GRPCInitialWindowSize"`
+	GRPCInitialConnWindowSize *uint32              `mapstructure:"GRPCInitialConnWindowSize"`
+	GRPCMaxHeaderListSize     *uint32              `mapstructure:"GRPCMaxHeaderListSize"`
+	GRPCKeepaliveParams       *GRPCClientKeepalive `mapstructure:"GRPCKeepaliveParams"`
+}
+
+type GRPCClientKeepalive struct {
+	Time                string `mapstructure:"Time"`
+	Timeout             string `mapstructure:"Timeout"`
+	PermitWithoutStream bool   `mapstructure:"PermitWithoutStream"`
 }

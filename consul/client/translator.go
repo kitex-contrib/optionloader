@@ -18,6 +18,7 @@ import (
 	"fmt"
 	kitexclient "github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/connpool"
+	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/grpc"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/transport"
@@ -163,5 +164,94 @@ func backupRequestTranslator(config *ConsulConfig) ([]kitexclient.Option, error)
 		return nil, err
 	}
 	res = append(res, kitexclient.WithBackupRequest(backupPolicy))
+	return res, nil
+}
+func rpcTimeoutTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.RPCTimeout
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	rpcTimeout, err := utils.ParseDuration(*c)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, kitexclient.WithRPCTimeout(rpcTimeout))
+	return res, nil
+}
+func connectionTimeoutTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.ConnectionTimeout
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	rpcTimeout, err := utils.ParseDuration(*c)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, kitexclient.WithConnectTimeout(rpcTimeout))
+	return res, nil
+}
+func tagsTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.Tags
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	for _, tag := range c {
+		res = append(res, kitexclient.WithTag(tag.Key, tag.Value))
+	}
+	return res, nil
+}
+func statsLevelTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.StatsLevel
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	res = append(res, kitexclient.WithStatsLevel(*c))
+	return res, nil
+}
+
+func grpcTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+	c := config.GRPC
+	if c == nil {
+		return nil, nil
+	}
+	var res []kitexclient.Option
+	if c.GRPCConnPoolSize != nil {
+		res = append(res, kitexclient.WithGRPCConnPoolSize(*c.GRPCConnPoolSize))
+	}
+	if c.GRPCWriteBufferSize != nil {
+		res = append(res, kitexclient.WithGRPCWriteBufferSize(*c.GRPCWriteBufferSize))
+	}
+	if c.GRPCReadBufferSize != nil {
+		res = append(res, kitexclient.WithGRPCReadBufferSize(*c.GRPCReadBufferSize))
+	}
+	if c.GRPCInitialWindowSize != nil {
+		res = append(res, kitexclient.WithGRPCInitialWindowSize(*c.GRPCInitialWindowSize))
+	}
+	if c.GRPCInitialConnWindowSize != nil {
+		res = append(res, kitexclient.WithGRPCInitialConnWindowSize(*c.GRPCInitialConnWindowSize))
+	}
+	if c.GRPCMaxHeaderListSize != nil {
+		res = append(res, kitexclient.WithGRPCMaxHeaderListSize(*c.GRPCMaxHeaderListSize))
+	}
+	if c.GRPCKeepaliveParams != nil {
+		keepaliveTime, err := utils.ParseDuration(c.GRPCKeepaliveParams.Time)
+		if err != nil {
+			return nil, err
+		}
+		keepaliveTimeout, err := utils.ParseDuration(c.GRPCKeepaliveParams.Timeout)
+		if err != nil {
+			return nil, err
+		}
+		keepaliveParams := grpc.ClientKeepalive{
+			Time:                keepaliveTime,
+			Timeout:             keepaliveTimeout,
+			PermitWithoutStream: c.GRPCKeepaliveParams.PermitWithoutStream,
+		}
+		res = append(res, kitexclient.WithGRPCKeepaliveParams(keepaliveParams))
+	}
 	return res, nil
 }

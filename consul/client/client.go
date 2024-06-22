@@ -104,6 +104,12 @@ func NewLoader(clientServiceName, serverServiceName string, reader *ConsulReader
 		failureRetryTranslator,
 		specifiedResultRetryTranslator,
 		backupRequestTranslator,
+		rpcTimeoutTranslator,
+		connectionTimeoutTranslator,
+		tagsTranslator,
+		statsLevelTranslator,
+		grpcConnPoolSizeTranslator,
+		grpcWriteBufferSizeTranslator,
 	}
 
 	if len(opts.MyTranslators) != 0 {
