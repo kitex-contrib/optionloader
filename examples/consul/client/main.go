@@ -66,7 +66,7 @@ func myTranslator(config consulClient.ConsulConfig) ([]kitexclient.Option, error
 	return opts, nil
 }
 
-func myStreamTranslators(config consulClient.ConsulConfig) ([]streamclient.Option, error) {
+func myStreamTranslator(config consulClient.ConsulConfig) ([]streamclient.Option, error) {
 	c := config.MyConfig
 	if c == nil {
 		return nil, nil
@@ -78,7 +78,7 @@ func myStreamTranslators(config consulClient.ConsulConfig) ([]streamclient.Optio
 	return opts, nil
 }
 
-func myCallOptionMapTranslators(config consulClient.ConsulConfig) *map[string]callopt.Option {
+func myCallOptionMapTranslator(config consulClient.ConsulConfig) *map[string]callopt.Option {
 	c := config.MyConfig
 	if c == nil {
 		return nil
@@ -88,7 +88,7 @@ func myCallOptionMapTranslators(config consulClient.ConsulConfig) *map[string]ca
 	return &res
 }
 
-func myCallOptionTranslators(config consulClient.ConsulConfig) *callopt.Option {
+func myCallOptionTranslator(config consulClient.ConsulConfig) *callopt.Option {
 	c := config.MyConfig
 	if c == nil {
 		return nil
@@ -98,7 +98,7 @@ func myCallOptionTranslators(config consulClient.ConsulConfig) *callopt.Option {
 	return &res
 }
 
-func myStreamCallOptionMapTranslators(config consulClient.ConsulConfig) *map[string]streamcall.Option {
+func myStreamCallOptionMapTranslator(config consulClient.ConsulConfig) *map[string]streamcall.Option {
 	c := config.MyConfig
 	if c == nil {
 		return nil
@@ -108,7 +108,7 @@ func myStreamCallOptionMapTranslators(config consulClient.ConsulConfig) *map[str
 	return &res
 }
 
-func myStreamCallOptionTranslators(config consulClient.ConsulConfig) *streamcall.Option {
+func myStreamCallOptionTranslator(config consulClient.ConsulConfig) *streamcall.Option {
 	c := config.MyConfig
 	if c == nil {
 		return nil
@@ -131,7 +131,12 @@ func main() {
 		return
 	}
 	loaderOptions := consulClient.LoaderOptions{
-		MyTranslators: map[string]consulClient.Translator{"myTranslator": myTranslator},
+		MyTranslators:                    map[string]consulClient.Translator{"name1": myTranslator},
+		MyStreamTranslators:              map[string]consulClient.StreamTranslator{"name2": myStreamTranslator},
+		MyCallOptionMapTranslators:       map[string]consulClient.CallOptionMapTranslator{"name3": myCallOptionMapTranslator},
+		MyCallOptionTranslators:          map[string]consulClient.CallOptionTranslator{"name4": myCallOptionTranslator},
+		MyStreamCallOptionMapTranslators: map[string]consulClient.StreamCallOptionMapTranslator{"name5": myStreamCallOptionMapTranslator},
+		MyStreamCallOptionTranslators:    map[string]consulClient.StreamCallOptionTranslator{"name6": myStreamCallOptionTranslator},
 	}
 	loader, err := consulClient.NewLoader(clientServiceName, serverServiceName, reader, loaderOptions)
 	if err != nil {

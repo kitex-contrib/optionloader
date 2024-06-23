@@ -75,7 +75,7 @@ func main() {
 		return
 	}
 	loaderOptions := consulServer.LoaderOptions{
-		MyTranslators: map[string]consulServer.Translator{"myTranslator": myTranslator},
+		MyTranslators: map[string]consulServer.Translator{"name1": myTranslator},
 	}
 	loader, err := consulServer.NewLoader(serverServiceName, reader, loaderOptions)
 	if err != nil {
