@@ -25,6 +25,7 @@ type Loader interface {
 	Load() error
 	GetCallOpt(name string) interface{}
 	GetSuite() ConsulClientSuite
+	GetStreamSuite() ConsulClientStreamSuite
 	RegisterTranslator(name string, translator Translator)
 	RegisterStreamTranslator(name string, streamTranslator StreamTranslator)
 	RegisterCallOptionMapTranslator(name string, callOptionMapTranslator CallOptionMapTranslator)
@@ -47,6 +48,7 @@ type ConsulLoader struct {
 	clientServiceName              string
 	serverServiceName              string
 	suite                          *ConsulClientSuite
+	streamSuite                    *ConsulClientStreamSuite
 	shouldResultRetry              *retry.ShouldResultRetry
 }
 
@@ -64,41 +66,46 @@ func (l *ConsulLoader) Load() error {
 			config.ShouldResultRetry = l.shouldResultRetry
 		}
 	}
+	l.options = []kitexclient.Option{}
 	for _, translator := range l.translators {
 		opts, err := translator(config)
 		if err != nil {
 			klog.Errorf(err.Error())
 			continue
 		}
-		l.options = append([]kitexclient.Option{}, opts...)
+		l.options = append(l.options, opts...)
 	}
+	l.streamOptions = []streamclient.Option{}
 	for _, translator := range l.streamTranslators {
 		opts, err := translator(config)
 		if err != nil {
 			klog.Errorf(err.Error())
 			continue
 		}
-		l.streamOptions = append([]streamclient.Option{}, opts...)
+		l.streamOptions = append(l.streamOptions, opts...)
 	}
 	l.callOptions = map[string]interface{}{}
 	for name, translator := range l.callOptionMapTranslators {
-		opts := translator(config)
+		opts := *translator(config)
 		l.callOptions[name] = opts
 	}
 	for name, translator := range l.callOptionTranslators {
-		opts := translator(config)
+		opts := *translator(config)
 		l.callOptions[name] = opts
 	}
 	for name, translator := range l.streamCallOptionMapTranslators {
-		opts := translator(config)
+		opts := *translator(config)
 		l.callOptions[name] = opts
 	}
 	for name, translator := range l.streamCallOptionTranslators {
-		opts := translator(config)
+		opts := *translator(config)
 		l.callOptions[name] = opts
 	}
 	l.suite = &ConsulClientSuite{
 		opts: l.options,
+	}
+	l.streamSuite = &ConsulClientStreamSuite{
+		opts: l.streamOptions,
 	}
 	return nil
 }
@@ -108,8 +115,11 @@ func (l *ConsulLoader) GetCallOpt(name string) interface{} {
 }
 
 func (l *ConsulLoader) GetSuite() ConsulClientSuite {
-	// 返回当前的 options
 	return *l.suite
+}
+
+func (l *ConsulLoader) GetStreamSuite() ConsulClientStreamSuite {
+	return *l.streamSuite
 }
 
 func (l *ConsulLoader) RegisterTranslator(name string, translator Translator) {

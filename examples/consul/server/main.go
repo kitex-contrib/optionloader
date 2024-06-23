@@ -49,22 +49,8 @@ type myConfig struct {
 	ConfigTwo []string `mapstructure:"configTwo"`
 }
 
-func (r *myConfig) String() string {
-	var output string
-
-	if r.ConfigOne != nil {
-		output += fmt.Sprintf("ConfigOne: %s\n", *r.ConfigOne)
-	}
-
-	if r.ConfigTwo != nil {
-		output += fmt.Sprintf("ConfigTwo: %v\n", r.ConfigTwo)
-	}
-
-	return output
-}
-
 // 用户可自定义Translator，用于将myConfig解析成Options
-func myTranslator(config *consulServer.ConsulConfig) ([]kitexserver.Option, error) {
+func myTranslator(config consulServer.ConsulConfig) ([]kitexserver.Option, error) {
 	c := config.MyConfig
 	if c == nil {
 		return nil, nil
@@ -72,7 +58,7 @@ func myTranslator(config *consulServer.ConsulConfig) ([]kitexserver.Option, erro
 	var opts []kitexserver.Option
 	//具体处理逻辑
 	_ = opts
-	fmt.Println("myConfigTranslator run! myConfig:" + c.String())
+	fmt.Println("myConfigTranslator run!")
 	return opts, nil
 }
 
@@ -88,8 +74,10 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	myTranslators := []consulServer.Translator{myTranslator}
-	loader, err := consulServer.NewLoader(serverServiceName, reader, myTranslators...)
+	loaderOptions := consulServer.LoaderOptions{
+		MyTranslators: map[string]consulServer.Translator{"myTranslator": myTranslator},
+	}
+	loader, err := consulServer.NewLoader(serverServiceName, reader, loaderOptions)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -99,8 +87,10 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println("Options: ", loader.GetSuite().Options())
-	config, _ := reader.GetConfig()
+	suite := loader.GetSuite()
+	opts := suite.Options()
+	fmt.Println("Options: ", opts)
+	config := reader.GetConfig()
 	fmt.Print("Config:", config.String())
-	fmt.Print("Suite:", loader.GetSuite())
+	fmt.Print("Suite:", suite)
 }

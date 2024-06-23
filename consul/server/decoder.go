@@ -37,32 +37,3 @@ func (p *defaultParser) Decode(configType ConfigType, data []byte, config *Consu
 		return fmt.Errorf("unsupported config data type %s", configType)
 	}
 }
-
-type Config interface {
-}
-
-type ConsulConfig struct {
-	ServerBasicInfo *EndpointBasicInfo `mapstructure:"ServerBasicInfo"`
-	ServiceAddr     []Addr             `mapstructure:"ServiceAddr"`
-	MuxTransport    *bool              `mapstructure:"MuxTransport"`
-	MyConfig        Config             `mapstructure:"MyConfig"`
-}
-
-func (c *ConsulConfig) String() string {
-	marshal, err := json.Marshal(c)
-	if err != nil {
-		return ""
-	}
-	return string(marshal)
-}
-
-type EndpointBasicInfo struct {
-	ServiceName string            `mapstructure:"ServiceName"`
-	Method      string            `mapstructure:"Method"`
-	Tags        map[string]string `mapstructure:"Tags"`
-}
-
-type Addr struct {
-	Network string `mapstructure:"network"`
-	Address string `mapstructure:"address"`
-}

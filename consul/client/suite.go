@@ -16,6 +16,7 @@ package client
 
 import (
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/client/streamclient"
 )
 
 type ConsulClientSuite struct {
@@ -25,6 +26,17 @@ type ConsulClientSuite struct {
 // Options return a list client.Option
 func (s *ConsulClientSuite) Options() []client.Option {
 	newOpts := make([]client.Option, len(s.opts))
+	copy(newOpts, s.opts)
+	return newOpts
+}
+
+type ConsulClientStreamSuite struct {
+	opts []streamclient.Option
+}
+
+// Options return a list streamclient.Option
+func (s *ConsulClientStreamSuite) Options() []streamclient.Option {
+	newOpts := make([]streamclient.Option, len(s.opts))
 	copy(newOpts, s.opts)
 	return newOpts
 }

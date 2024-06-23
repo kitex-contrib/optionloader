@@ -18,6 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 	kitexclient "github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/client/callopt"
+	"github.com/cloudwego/kitex/client/callopt/streamcall"
+	"github.com/cloudwego/kitex/client/streamclient"
 	consulClient "github.com/kitex-contrib/optionloader/consul/client"
 	"github.com/kitex-contrib/optionloader/utils"
 	"gopkg.in/yaml.v3"
@@ -50,31 +53,69 @@ type myConfig struct {
 	ConfigTwo []string `mapstructure:"configTwo"`
 }
 
-func (r *myConfig) String() string {
-	var output string
-
-	if r.ConfigOne != nil {
-		output += fmt.Sprintf("ConfigOne: %s\n", *r.ConfigOne)
-	}
-
-	if r.ConfigTwo != nil {
-		output += fmt.Sprintf("ConfigTwo: %v\n", r.ConfigTwo)
-	}
-
-	return output
-}
-
 // 用户可自定义Translator，用于将myConfig解析成Options
-func myTranslator(config *consulClient.ConsulConfig) ([]kitexclient.Option, error) {
+func myTranslator(config consulClient.ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.MyConfig
 	if c == nil {
 		return nil, nil
 	}
-	opts := []kitexclient.Option{}
+	var opts []kitexclient.Option
 	//具体处理逻辑
 	_ = opts
-	fmt.Println("myConfigTranslator run! myConfig:" + c.String())
+	fmt.Println("myConfigTranslator run!")
 	return opts, nil
+}
+
+func myStreamTranslators(config consulClient.ConsulConfig) ([]streamclient.Option, error) {
+	c := config.MyConfig
+	if c == nil {
+		return nil, nil
+	}
+	var opts []streamclient.Option
+	//具体处理逻辑
+	_ = opts
+	fmt.Println("myStreamTranslators run!")
+	return opts, nil
+}
+
+func myCallOptionMapTranslators(config consulClient.ConsulConfig) *map[string]callopt.Option {
+	c := config.MyConfig
+	if c == nil {
+		return nil
+	}
+	var res map[string]callopt.Option
+	fmt.Println("myCallOptionMapTranslators run!")
+	return &res
+}
+
+func myCallOptionTranslators(config consulClient.ConsulConfig) *callopt.Option {
+	c := config.MyConfig
+	if c == nil {
+		return nil
+	}
+	var res callopt.Option
+	fmt.Println("myCallOptionTranslators run!")
+	return &res
+}
+
+func myStreamCallOptionMapTranslators(config consulClient.ConsulConfig) *map[string]streamcall.Option {
+	c := config.MyConfig
+	if c == nil {
+		return nil
+	}
+	var res map[string]streamcall.Option
+	fmt.Println("myStreamCallOptionMapTranslators run!")
+	return &res
+}
+
+func myStreamCallOptionTranslators(config consulClient.ConsulConfig) *streamcall.Option {
+	c := config.MyConfig
+	if c == nil {
+		return nil
+	}
+	var res streamcall.Option
+	fmt.Println("myStreamCallOptionTranslators run!")
+	return &res
 }
 
 func main() {
@@ -90,7 +131,7 @@ func main() {
 		return
 	}
 	loaderOptions := consulClient.LoaderOptions{
-		MyTranslators: []consulClient.Translator{myTranslator},
+		MyTranslators: map[string]consulClient.Translator{"myTranslator": myTranslator},
 	}
 	loader, err := consulClient.NewLoader(clientServiceName, serverServiceName, reader, loaderOptions)
 	if err != nil {
@@ -102,8 +143,15 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println("Options: ", loader.GetSuite().Options())
-	config, _ := reader.GetConfig()
-	fmt.Print("Config:", config.String())
-	fmt.Print("Suite", loader.GetSuite())
+	fmt.Println("CallOption: ", loader.GetCallOpt("RPCTimeout"))
+	config := reader.GetConfig()
+	fmt.Print("Config: ", config.String())
+	suite := loader.GetSuite()
+	fmt.Print("Suite: ", suite)
+	streamSuite := loader.GetStreamSuite()
+	fmt.Print("Stream Suite: ", streamSuite)
+	opts := suite.Options()
+	fmt.Println("Options: ", opts)
+	streamOpts := streamSuite.Options()
+	fmt.Println("Stream Options: ", streamOpts)
 }

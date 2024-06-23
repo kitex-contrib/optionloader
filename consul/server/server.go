@@ -86,23 +86,32 @@ func NewReader(opts ReaderOptions) (*ConsulReader, error) {
 	return r, nil
 }
 
-func NewLoader(serverServiceName string, reader *ConsulReader, myTranslators ...Translator) (*ConsulLoader, error) {
+type LoaderOptions struct {
+	MyTranslators map[string]Translator
+}
+
+func NewLoader(serverServiceName string, reader *ConsulReader, opts LoaderOptions) (*ConsulLoader, error) {
 
 	// Register all translators
-	translators := []Translator{
-		basicInfoTranslator,
-		serviceAddrTranslator,
-		muxTransportTranslator,
-	}
-
-	if len(myTranslators) != 0 {
-		translators = append(translators, myTranslators...)
+	translators := map[string]Translator{
+		"basicInfo":        basicInfoTranslator,
+		"serviceAddr":      serviceAddrTranslator,
+		"muxTransport":     muxTransportTranslator,
+		"readWriteTimeout": readWriteTimeoutTranslator,
+		"exitWaitTime":     exitWaitTimeTranslator,
+		"maxConnIdleTime":  maxConnIdleTimeTranslator,
+		"statsLevel":       statsLevelTranslator,
+		"grpc":             grpcTranslator,
 	}
 
 	loader := &ConsulLoader{
 		translators:       translators,
 		ServerServiceName: serverServiceName,
 		reader:            reader,
+	}
+
+	for name, translator := range opts.MyTranslators {
+		loader.RegisterTranslator(name, translator)
 	}
 
 	return loader, nil
