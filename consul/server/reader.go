@@ -39,7 +39,7 @@ const (
 type Reader interface {
 	SetDecoder(decoder ConfigParser) error
 	ReadToConfig(p *Path) error
-	GetConfig() (*ConsulConfig, error)
+	GetConfig() ConsulConfig
 }
 
 type ConsulReader struct {
@@ -82,9 +82,7 @@ func (r *ConsulReader) ReadToConfig(p *Path) error {
 	}
 	return nil
 }
-func (r *ConsulReader) GetConfig() (*ConsulConfig, error) {
-	return r.config, nil
-}
+func (r *ConsulReader) GetConfig() ConsulConfig { return *r.config }
 
 func (r *ConsulReader) render(p *Path, t *template.Template) (string, error) {
 	var tpl bytes.Buffer

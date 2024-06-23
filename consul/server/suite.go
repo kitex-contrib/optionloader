@@ -22,7 +22,9 @@ type ConsulServerSuite struct {
 	opts []server.Option
 }
 
-// Options return a list client.Option
+// Options return a list server.Option
 func (s *ConsulServerSuite) Options() []server.Option {
-	return s.opts
+	newOpts := make([]server.Option, len(s.opts))
+	copy(newOpts, s.opts)
+	return newOpts
 }

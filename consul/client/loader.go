@@ -16,25 +16,38 @@ package client
 
 import (
 	kitexclient "github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/client/streamclient"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/retry"
 )
 
-type Translator func(config *ConsulConfig) ([]kitexclient.Option, error)
-
 type Loader interface {
 	Load() error
-	GetSuite() *ConsulClientSuite
+	GetCallOpt(name string) interface{}
+	GetSuite() ConsulClientSuite
+	RegisterTranslator(name string, translator Translator)
+	RegisterStreamTranslator(name string, streamTranslator StreamTranslator)
+	RegisterCallOptionMapTranslator(name string, callOptionMapTranslator CallOptionMapTranslator)
+	RegisterCallOptionTranslator(name string, callOptionTranslator CallOptionTranslator)
+	RegisterStreamCallOptionMapTranslator(name string, streamCallOptionMapTranslator StreamCallOptionMapTranslator)
+	RegisterStreamCallOptionTranslator(name string, streamCallOptionTranslator StreamCallOptionTranslator)
 }
 
 type ConsulLoader struct {
-	reader            *ConsulReader
-	options           []kitexclient.Option
-	translators       []Translator
-	clientServiceName string
-	serverServiceName string
-	suite             *ConsulClientSuite
-	shouldResultRetry *retry.ShouldResultRetry
+	reader                         *ConsulReader
+	options                        []kitexclient.Option
+	streamOptions                  []streamclient.Option
+	callOptions                    map[string]interface{}
+	translators                    map[string]Translator
+	streamTranslators              map[string]StreamTranslator
+	callOptionMapTranslators       map[string]CallOptionMapTranslator
+	callOptionTranslators          map[string]CallOptionTranslator
+	streamCallOptionMapTranslators map[string]StreamCallOptionMapTranslator
+	streamCallOptionTranslators    map[string]StreamCallOptionTranslator
+	clientServiceName              string
+	serverServiceName              string
+	suite                          *ConsulClientSuite
+	shouldResultRetry              *retry.ShouldResultRetry
 }
 
 func (l *ConsulLoader) Load() error {
@@ -43,10 +56,7 @@ func (l *ConsulLoader) Load() error {
 	if err != nil {
 		return err
 	}
-	config, err := l.reader.GetConfig()
-	if err != nil {
-		return err
-	}
+	config := l.reader.GetConfig()
 	if l.shouldResultRetry != nil {
 		if config.FailureRetry != nil {
 			config.FailureRetry.ShouldResultRetry = l.shouldResultRetry
@@ -60,7 +70,32 @@ func (l *ConsulLoader) Load() error {
 			klog.Errorf(err.Error())
 			continue
 		}
-		l.options = append(l.options, opts...)
+		l.options = append([]kitexclient.Option{}, opts...)
+	}
+	for _, translator := range l.streamTranslators {
+		opts, err := translator(config)
+		if err != nil {
+			klog.Errorf(err.Error())
+			continue
+		}
+		l.streamOptions = append([]streamclient.Option{}, opts...)
+	}
+	l.callOptions = map[string]interface{}{}
+	for name, translator := range l.callOptionMapTranslators {
+		opts := translator(config)
+		l.callOptions[name] = opts
+	}
+	for name, translator := range l.callOptionTranslators {
+		opts := translator(config)
+		l.callOptions[name] = opts
+	}
+	for name, translator := range l.streamCallOptionMapTranslators {
+		opts := translator(config)
+		l.callOptions[name] = opts
+	}
+	for name, translator := range l.streamCallOptionTranslators {
+		opts := translator(config)
+		l.callOptions[name] = opts
 	}
 	l.suite = &ConsulClientSuite{
 		opts: l.options,
@@ -68,7 +103,35 @@ func (l *ConsulLoader) Load() error {
 	return nil
 }
 
-func (l *ConsulLoader) GetSuite() *ConsulClientSuite {
+func (l *ConsulLoader) GetCallOpt(name string) interface{} {
+	return l.callOptions[name]
+}
+
+func (l *ConsulLoader) GetSuite() ConsulClientSuite {
 	// 返回当前的 options
-	return l.suite
+	return *l.suite
+}
+
+func (l *ConsulLoader) RegisterTranslator(name string, translator Translator) {
+	l.translators[name] = translator
+}
+
+func (l *ConsulLoader) RegisterStreamTranslator(name string, streamTranslator StreamTranslator) {
+	l.streamTranslators[name] = streamTranslator
+}
+
+func (l *ConsulLoader) RegisterCallOptionMapTranslator(name string, callOptionMapTranslator CallOptionMapTranslator) {
+	l.callOptionMapTranslators[name] = callOptionMapTranslator
+}
+
+func (l *ConsulLoader) RegisterCallOptionTranslator(name string, callOptionTranslator CallOptionTranslator) {
+	l.callOptionTranslators[name] = callOptionTranslator
+}
+
+func (l *ConsulLoader) RegisterStreamCallOptionMapTranslator(name string, streamCallOptionMapTranslator StreamCallOptionMapTranslator) {
+	l.streamCallOptionMapTranslators[name] = streamCallOptionMapTranslator
+}
+
+func (l *ConsulLoader) RegisterStreamCallOptionTranslator(name string, streamCallOptionTranslator StreamCallOptionTranslator) {
+	l.streamCallOptionTranslators[name] = streamCallOptionTranslator
 }

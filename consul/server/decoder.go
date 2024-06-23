@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"strings"
 )
 
 type ConfigParser interface {
@@ -40,7 +39,6 @@ func (p *defaultParser) Decode(configType ConfigType, data []byte, config *Consu
 }
 
 type Config interface {
-	String() string
 }
 
 type ConsulConfig struct {
@@ -51,20 +49,11 @@ type ConsulConfig struct {
 }
 
 func (c *ConsulConfig) String() string {
-	var builder strings.Builder
-	if c.ServerBasicInfo != nil {
-		builder.WriteString(fmt.Sprintf("ServerBasicInfo: %v\n", *c.ServerBasicInfo))
+	marshal, err := json.Marshal(c)
+	if err != nil {
+		return ""
 	}
-	if c.ServiceAddr != nil {
-		builder.WriteString(fmt.Sprintf("ServiceAddr: %v\n", c.ServiceAddr))
-	}
-	if c.MuxTransport != nil {
-		builder.WriteString(fmt.Sprintf("MuxTransport: %v\n", *c.MuxTransport))
-	}
-	if c.MyConfig != nil {
-		builder.WriteString(c.MyConfig.String())
-	}
-	return builder.String()
+	return string(marshal)
 }
 
 type EndpointBasicInfo struct {

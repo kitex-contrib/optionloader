@@ -15,14 +15,12 @@
 package client
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/stats"
-	"strings"
 )
 
 type Config interface {
-	String() string
 }
 
 type ConsulConfig struct {
@@ -39,41 +37,23 @@ type ConsulConfig struct {
 	Tags              []Tag                    `mapstructure:"Tags"`
 	StatsLevel        *stats.Level             `mapstructure:"StatsLevel"`
 	GRPC              *Grpc                    `mapstructure:"GRPC"`
+	CallOpt           *CallOpt                 `mapstructure:"CallOpt"`
+	Stream            *StreamConfig            `mapstructure:"Stream"`
+	StreamCallOpt     *StreamCallOpt           `mapstructure:"StreamCallOpt"`
 	MyConfig          Config                   `mapstructure:"MyConfig"`
 }
 
 func (c *ConsulConfig) String() string {
-	var builder strings.Builder
-	if c.ClientBasicInfo != nil {
-		builder.WriteString(fmt.Sprintf("ClientBasicInfo: %v\n", *c.ClientBasicInfo))
+	marshal, err := json.Marshal(c)
+	if err != nil {
+		return ""
 	}
-	if c.HostPorts != nil {
-		builder.WriteString(fmt.Sprintf("HostPorts: %v\n", c.HostPorts))
-	}
-	if c.DestService != nil {
-		builder.WriteString(fmt.Sprintf("DestService: %v\n", *c.DestService))
-	}
-	if c.Protocol != nil {
-		builder.WriteString(fmt.Sprintf("Protocol: %v\n", *c.Protocol))
-	}
-	if c.Connection != nil {
-		builder.WriteString(fmt.Sprintf("Connection: %v\n", *c.Connection))
-	}
-	if c.FailureRetry != nil {
-		builder.WriteString(fmt.Sprintf("FailureRetry: %v\n", *c.FailureRetry))
-	}
-	if c.BackupRequest != nil {
-		builder.WriteString(fmt.Sprintf("BackupRequest: %v\n", *c.BackupRequest))
-	}
-	if c.MyConfig != nil {
-		builder.WriteString(c.MyConfig.String())
-	}
-
-	return builder.String()
+	return string(marshal)
 }
 
 type BackOffType string
 type BackOffCfgKey string
+type Type int
 
 type EndpointBasicInfo struct {
 	ServiceName string            `mapstructure:"ServiceName"`
@@ -148,4 +128,40 @@ type GRPCClientKeepalive struct {
 	Time                string `mapstructure:"Time"`
 	Timeout             string `mapstructure:"Timeout"`
 	PermitWithoutStream bool   `mapstructure:"PermitWithoutStream"`
+}
+
+type CallOpt struct {
+	HostPorts         *map[string]string `mapstructure:"HostPorts"`
+	Urls              *map[string]string `mapstructure:"Urls"`
+	Tags              *map[string]Tag    `mapstructure:"Tags"`
+	RPCTimeout        *string            `mapstructure:"RPCTimeout"`
+	ConnectionTimeout *string            `mapstructure:"ConnectionTimeout"`
+	HTTPHost          *string            `mapstructure:"HTTPHost"`
+	RetryPolicy       *Policy            `mapstructure:"RetryPolicy"`
+	CompressorName    *string            `mapstructure:"CompressorName"`
+}
+
+type StreamConfig struct {
+	ClientBasicInfo   *EndpointBasicInfo `mapstructure:"ClientBasicInfo"`
+	HostPorts         []string           `mapstructure:"HostPorts"`
+	DestService       *string            `mapstructure:"DestService"`
+	ConnectionTimeout *string            `mapstructure:"ConnectionTimeout"`
+	Tags              []Tag              `mapstructure:"Tags"`
+	StatsLevel        *stats.Level       `mapstructure:"StatsLevel"`
+	GRPC              *Grpc              `mapstructure:"GRPC"`
+}
+
+type StreamCallOpt struct {
+	HostPorts         *map[string]string `mapstructure:"HostPorts"`
+	Urls              *map[string]string `mapstructure:"Urls"`
+	Tags              *map[string]Tag    `mapstructure:"Tags"`
+	ConnectionTimeout *string            `mapstructure:"ConnectionTimeout"`
+	CompressorName    *string            `mapstructure:"CompressorName"`
+}
+
+type Policy struct {
+	Enable        bool           `mapstructure:"Enable"`
+	Type          Type           `mapstructure:"Type"`
+	FailurePolicy *FailurePolicy `mapstructure:"FailurePolicy"`
+	BackupPolicy  *BackupPolicy  `mapstructure:"BackupPolicy"`
 }

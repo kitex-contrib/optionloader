@@ -88,40 +88,94 @@ func NewReader(opts ReaderOptions) (*ConsulReader, error) {
 }
 
 type LoaderOptions struct {
-	MyTranslators     []Translator
-	ShouldResultRetry *retry.ShouldResultRetry
+	MyTranslators                    map[string]Translator
+	MyStreamTranslators              map[string]StreamTranslator
+	MyCallOptionMapTranslators       map[string]CallOptionMapTranslator
+	MyCallOptionTranslators          map[string]CallOptionTranslator
+	MyStreamCallOptionMapTranslators map[string]StreamCallOptionMapTranslator
+	MyStreamCallOptionTranslators    map[string]StreamCallOptionTranslator
+	ShouldResultRetry                *retry.ShouldResultRetry
 }
 
 func NewLoader(clientServiceName, serverServiceName string, reader *ConsulReader, opts LoaderOptions) (*ConsulLoader, error) {
 
 	// Register all translators
-	translators := []Translator{
-		basicInfoTranslator,
-		hostPortsTranslator,
-		destServiceTranslator,
-		protocolTranslator,
-		connectionTranslator,
-		failureRetryTranslator,
-		specifiedResultRetryTranslator,
-		backupRequestTranslator,
-		rpcTimeoutTranslator,
-		connectionTimeoutTranslator,
-		tagsTranslator,
-		statsLevelTranslator,
-		grpcConnPoolSizeTranslator,
-		grpcWriteBufferSizeTranslator,
+	translators := map[string]Translator{
+		"basicInfo":            basicInfoTranslator,
+		"hostPorts":            hostPortsTranslator,
+		"destService":          destServiceTranslator,
+		"protocol":             protocolTranslator,
+		"connection":           connectionTranslator,
+		"failureRetry":         failureRetryTranslator,
+		"specifiedResultRetry": specifiedResultRetryTranslator,
+		"backupRequest":        backupRequestTranslator,
+		"rpcTimeout":           rpcTimeoutTranslator,
+		"connectionTimeout":    connectionTimeoutTranslator,
+		"tags":                 tagsTranslator,
+		"statsLevel":           statsLevelTranslator,
+		"grpc":                 grpcTranslator,
 	}
-
-	if len(opts.MyTranslators) != 0 {
-		translators = append(translators, opts.MyTranslators...)
+	streamTranslators := map[string]StreamTranslator{
+		"streamBasicInfo":         streamBasicInfoTranslator,
+		"streamHostPorts":         streamHostPortsTranslator,
+		"streamDestService":       streamDestServiceTranslator,
+		"streamConnectionTimeout": streamConnectionTimeoutTranslator,
+		"streamTags":              streamTagsTranslator,
+		"streamStatsLevel":        streamStatsLevelTranslator,
+		"streamGrpc":              streamGrpcTranslator,
+	}
+	callOptionMapTranslators := map[string]CallOptionMapTranslator{
+		"callOptionHostPorts": callOptionHostPortsTranslator,
+		"callOptionUrls":      callOptionUrlsTranslator,
+		"callOptionTags":      callOptionTagsTranslator,
+	}
+	callOptionTranslators := map[string]CallOptionTranslator{
+		"callOptionRPCTimeout":        callOptionRPCTimeoutTranslator,
+		"callOptionConnectionTimeout": callOptionConnectionTimeoutTranslator,
+		"callOptionHTTPHostTimeout":   callOptionHTTPHostTimeoutTranslator,
+		"callOptionRetryPolicy":       callOptionRetryPolicyTranslator,
+		"callOptionGRPCCompressor":    callOptionGRPCCompressorTranslator,
+	}
+	streamCallOptionMapTranslators := map[string]StreamCallOptionMapTranslator{
+		"streamCallOptionHostPorts": streamCallOptionHostPortsTranslator,
+		"streamCallOptionUrls":      streamCallOptionUrlsTranslator,
+		"streamCallOptionTags":      streamCallOptionTagsTranslator,
+	}
+	streamCallOptionTranslators := map[string]StreamCallOptionTranslator{
+		"streamCallOptionConnectionTimeout": streamCallOptionConnectionTimeoutTranslator,
+		"streamCallOptionGRPCCompressor":    streamCallOptionGRPCCompressorTranslator,
 	}
 
 	loader := &ConsulLoader{
-		translators:       translators,
-		clientServiceName: clientServiceName,
-		serverServiceName: serverServiceName,
-		reader:            reader,
-		shouldResultRetry: opts.ShouldResultRetry,
+		translators:                    translators,
+		streamTranslators:              streamTranslators,
+		callOptionMapTranslators:       callOptionMapTranslators,
+		callOptionTranslators:          callOptionTranslators,
+		streamCallOptionMapTranslators: streamCallOptionMapTranslators,
+		streamCallOptionTranslators:    streamCallOptionTranslators,
+		clientServiceName:              clientServiceName,
+		serverServiceName:              serverServiceName,
+		reader:                         reader,
+		shouldResultRetry:              opts.ShouldResultRetry,
+	}
+
+	for name, translator := range opts.MyTranslators {
+		loader.RegisterTranslator(name, translator)
+	}
+	for name, translator := range opts.MyStreamTranslators {
+		loader.RegisterStreamTranslator(name, translator)
+	}
+	for name, translator := range opts.MyCallOptionMapTranslators {
+		loader.RegisterCallOptionMapTranslator(name, translator)
+	}
+	for name, translator := range opts.MyCallOptionTranslators {
+		loader.RegisterCallOptionTranslator(name, translator)
+	}
+	for name, translator := range opts.MyStreamCallOptionMapTranslators {
+		loader.RegisterStreamCallOptionMapTranslator(name, translator)
+	}
+	for name, translator := range opts.MyStreamCallOptionTranslators {
+		loader.RegisterStreamCallOptionTranslator(name, translator)
 	}
 
 	return loader, nil

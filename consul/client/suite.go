@@ -24,5 +24,7 @@ type ConsulClientSuite struct {
 
 // Options return a list client.Option
 func (s *ConsulClientSuite) Options() []client.Option {
-	return s.opts
+	newOpts := make([]client.Option, len(s.opts))
+	copy(newOpts, s.opts)
+	return newOpts
 }

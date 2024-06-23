@@ -19,11 +19,9 @@ import (
 	kitexserver "github.com/cloudwego/kitex/server"
 )
 
-type Translator func(config *ConsulConfig) ([]kitexserver.Option, error)
-
 type Loader interface {
 	Load() error
-	GetSuite() *ConsulServerSuite
+	GetSuite() ConsulServerSuite
 }
 
 type ConsulLoader struct {
@@ -40,10 +38,7 @@ func (l *ConsulLoader) Load() error {
 	if err != nil {
 		return err
 	}
-	config, err := l.reader.GetConfig()
-	if err != nil {
-		return err
-	}
+	config := l.reader.GetConfig()
 	for _, translator := range l.translators {
 		opts, err := translator(config)
 		if err != nil {
@@ -58,7 +53,7 @@ func (l *ConsulLoader) Load() error {
 	return nil
 }
 
-func (l *ConsulLoader) GetSuite() *ConsulServerSuite {
+func (l *ConsulLoader) GetSuite() ConsulServerSuite {
 	// 返回当前的 options
-	return l.suite
+	return *l.suite
 }

@@ -17,6 +17,9 @@ package client
 import (
 	"fmt"
 	kitexclient "github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/client/callopt"
+	"github.com/cloudwego/kitex/client/callopt/streamcall"
+	"github.com/cloudwego/kitex/client/streamclient"
 	"github.com/cloudwego/kitex/pkg/connpool"
 	"github.com/cloudwego/kitex/pkg/remote/trans/nphttp2/grpc"
 	"github.com/cloudwego/kitex/pkg/retry"
@@ -25,6 +28,18 @@ import (
 	"github.com/kitex-contrib/optionloader/utils"
 	"github.com/mitchellh/mapstructure"
 )
+
+type Translator func(config ConsulConfig) ([]kitexclient.Option, error)
+
+type StreamTranslator func(config ConsulConfig) ([]streamclient.Option, error)
+
+type CallOptionMapTranslator func(config ConsulConfig) *map[string]callopt.Option
+
+type CallOptionTranslator func(config ConsulConfig) *callopt.Option
+
+type StreamCallOptionMapTranslator func(config ConsulConfig) *map[string]streamcall.Option
+
+type StreamCallOptionTranslator func(config ConsulConfig) *streamcall.Option
 
 // Protocol indicates the transport protocol.
 type Protocol int
@@ -52,7 +67,7 @@ var protocolMap = map[string]Protocol{
 	"TTHeaderFramed": TTHeaderFramed,
 }
 
-func basicInfoTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func basicInfoTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.ClientBasicInfo
 	if c == nil {
 		return nil, nil
@@ -66,7 +81,7 @@ func basicInfoTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithClientBasicInfo(&rpcInfo))
 	return res, nil
 }
-func protocolTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func protocolTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.Protocol
 	if c == nil {
 		return nil, nil
@@ -80,7 +95,7 @@ func protocolTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 
 	return res, nil
 }
-func destServiceTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func destServiceTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.DestService
 	if c == nil {
 		return nil, nil
@@ -89,8 +104,7 @@ func destServiceTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithDestService(*c))
 	return res, nil
 }
-
-func hostPortsTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func hostPortsTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.HostPorts
 	if c == nil {
 		return nil, nil
@@ -99,7 +113,7 @@ func hostPortsTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithHostPorts(c...))
 	return res, nil
 }
-func connectionTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func connectionTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.Connection
 	if c == nil {
 		return nil, nil
@@ -129,7 +143,7 @@ func connectionTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 
 	return res, nil
 }
-func failureRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func failureRetryTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.FailureRetry
 	if c == nil {
 		return nil, nil
@@ -143,7 +157,7 @@ func failureRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) 
 	res = append(res, kitexclient.WithFailureRetry(failurePolicy))
 	return res, nil
 }
-func specifiedResultRetryTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func specifiedResultRetryTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.ShouldResultRetry
 	if c == nil {
 		return nil, nil
@@ -152,7 +166,7 @@ func specifiedResultRetryTranslator(config *ConsulConfig) ([]kitexclient.Option,
 	res = append(res, kitexclient.WithSpecifiedResultRetry(c))
 	return res, nil
 }
-func backupRequestTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func backupRequestTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.BackupRequest
 	if c == nil {
 		return nil, nil
@@ -166,7 +180,7 @@ func backupRequestTranslator(config *ConsulConfig) ([]kitexclient.Option, error)
 	res = append(res, kitexclient.WithBackupRequest(backupPolicy))
 	return res, nil
 }
-func rpcTimeoutTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func rpcTimeoutTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.RPCTimeout
 	if c == nil {
 		return nil, nil
@@ -179,7 +193,7 @@ func rpcTimeoutTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithRPCTimeout(rpcTimeout))
 	return res, nil
 }
-func connectionTimeoutTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func connectionTimeoutTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.ConnectionTimeout
 	if c == nil {
 		return nil, nil
@@ -192,7 +206,7 @@ func connectionTimeoutTranslator(config *ConsulConfig) ([]kitexclient.Option, er
 	res = append(res, kitexclient.WithConnectTimeout(rpcTimeout))
 	return res, nil
 }
-func tagsTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func tagsTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.Tags
 	if c == nil {
 		return nil, nil
@@ -203,7 +217,7 @@ func tagsTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	}
 	return res, nil
 }
-func statsLevelTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func statsLevelTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.StatsLevel
 	if c == nil {
 		return nil, nil
@@ -212,8 +226,7 @@ func statsLevelTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 	res = append(res, kitexclient.WithStatsLevel(*c))
 	return res, nil
 }
-
-func grpcTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
+func grpcTranslator(config ConsulConfig) ([]kitexclient.Option, error) {
 	c := config.GRPC
 	if c == nil {
 		return nil, nil
@@ -254,4 +267,257 @@ func grpcTranslator(config *ConsulConfig) ([]kitexclient.Option, error) {
 		res = append(res, kitexclient.WithGRPCKeepaliveParams(keepaliveParams))
 	}
 	return res, nil
+}
+func callOptionHostPortsTranslator(config ConsulConfig) *map[string]callopt.Option {
+	c := config.CallOpt
+	if c == nil || len(*c.HostPorts) == 0 {
+		return nil
+	}
+	var res map[string]callopt.Option
+	for name, hostPort := range *c.HostPorts {
+		res[name] = callopt.WithHostPort(hostPort)
+	}
+	return &res
+}
+func callOptionUrlsTranslator(config ConsulConfig) *map[string]callopt.Option {
+	c := config.CallOpt
+	if c == nil || len(*c.Urls) == 0 {
+		return nil
+	}
+	var res map[string]callopt.Option
+	for name, url := range *c.Urls {
+		res[name] = callopt.WithURL(url)
+	}
+	return &res
+}
+func callOptionTagsTranslator(config ConsulConfig) *map[string]callopt.Option {
+	c := config.CallOpt
+	if c == nil || len(*c.Tags) == 0 {
+		return nil
+	}
+	var res map[string]callopt.Option
+	for name, tag := range *c.Tags {
+		res[name] = callopt.WithTag(tag.Key, tag.Value)
+	}
+	return &res
+}
+func callOptionRPCTimeoutTranslator(config ConsulConfig) *callopt.Option {
+	c := config.CallOpt
+	if c == nil || c.RPCTimeout == nil {
+		return nil
+	}
+	var res callopt.Option
+	rpcTimeout, err := utils.ParseDuration(*c.RPCTimeout)
+	if err != nil {
+		return nil
+	}
+	res = callopt.WithRPCTimeout(rpcTimeout)
+	return &res
+}
+func callOptionConnectionTimeoutTranslator(config ConsulConfig) *callopt.Option {
+	c := config.CallOpt
+	if c == nil || c.ConnectionTimeout == nil {
+		return nil
+	}
+	var res callopt.Option
+	connectionTimeout, err := utils.ParseDuration(*c.ConnectionTimeout)
+	if err != nil {
+		return nil
+	}
+	res = callopt.WithConnectTimeout(connectionTimeout)
+	return &res
+}
+func callOptionHTTPHostTimeoutTranslator(config ConsulConfig) *callopt.Option {
+	c := config.CallOpt
+	if c == nil || c.HTTPHost == nil {
+		return nil
+	}
+	var res callopt.Option
+	res = callopt.WithHTTPHost(*c.HTTPHost)
+	return &res
+}
+func callOptionRetryPolicyTranslator(config ConsulConfig) *callopt.Option {
+	c := config.CallOpt
+	if c == nil || c.RetryPolicy == nil {
+		return nil
+	}
+	var res callopt.Option
+	retryPolicy := &retry.Policy{}
+	err := mapstructure.Decode(c.RetryPolicy, retryPolicy)
+	if err != nil {
+		return nil
+	}
+	res = callopt.WithRetryPolicy(*retryPolicy)
+	return &res
+}
+func callOptionGRPCCompressorTranslator(config ConsulConfig) *callopt.Option {
+	c := config.CallOpt
+	if c == nil || c.CompressorName == nil {
+		return nil
+	}
+	var res callopt.Option
+	res = callopt.WithGRPCCompressor(*c.CompressorName)
+	return &res
+}
+func streamBasicInfoTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.ClientBasicInfo
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	rpcInfo := rpcinfo.EndpointBasicInfo{
+		ServiceName: c.ServiceName,
+		Method:      c.Method,
+		Tags:        c.Tags,
+	}
+	res = append(res, streamclient.WithClientBasicInfo(&rpcInfo))
+	return res, nil
+}
+func streamHostPortsTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.HostPorts
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	res = append(res, streamclient.WithHostPorts(c...))
+	return res, nil
+}
+func streamDestServiceTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.DestService
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	res = append(res, streamclient.WithDestService(*c))
+	return res, nil
+}
+func streamConnectionTimeoutTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.ConnectionTimeout
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	rpcTimeout, err := utils.ParseDuration(*c)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, streamclient.WithConnectTimeout(rpcTimeout))
+	return res, nil
+}
+func streamTagsTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.Tags
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	for _, tag := range c {
+		res = append(res, streamclient.WithTag(tag.Key, tag.Value))
+	}
+	return res, nil
+}
+func streamStatsLevelTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.StatsLevel
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	res = append(res, streamclient.WithStatsLevel(*c))
+	return res, nil
+}
+func streamGrpcTranslator(config ConsulConfig) ([]streamclient.Option, error) {
+	c := config.Stream.GRPC
+	if c == nil {
+		return nil, nil
+	}
+	var res []streamclient.Option
+	if c.GRPCConnPoolSize != nil {
+		res = append(res, streamclient.WithGRPCConnPoolSize(*c.GRPCConnPoolSize))
+	}
+	if c.GRPCWriteBufferSize != nil {
+		res = append(res, streamclient.WithGRPCWriteBufferSize(*c.GRPCWriteBufferSize))
+	}
+	if c.GRPCReadBufferSize != nil {
+		res = append(res, streamclient.WithGRPCReadBufferSize(*c.GRPCReadBufferSize))
+	}
+	if c.GRPCInitialWindowSize != nil {
+		res = append(res, streamclient.WithGRPCInitialWindowSize(*c.GRPCInitialWindowSize))
+	}
+	if c.GRPCInitialConnWindowSize != nil {
+		res = append(res, streamclient.WithGRPCInitialConnWindowSize(*c.GRPCInitialConnWindowSize))
+	}
+	if c.GRPCMaxHeaderListSize != nil {
+		res = append(res, streamclient.WithGRPCMaxHeaderListSize(*c.GRPCMaxHeaderListSize))
+	}
+	if c.GRPCKeepaliveParams != nil {
+		keepaliveTime, err := utils.ParseDuration(c.GRPCKeepaliveParams.Time)
+		if err != nil {
+			return nil, err
+		}
+		keepaliveTimeout, err := utils.ParseDuration(c.GRPCKeepaliveParams.Timeout)
+		if err != nil {
+			return nil, err
+		}
+		keepaliveParams := grpc.ClientKeepalive{
+			Time:                keepaliveTime,
+			Timeout:             keepaliveTimeout,
+			PermitWithoutStream: c.GRPCKeepaliveParams.PermitWithoutStream,
+		}
+		res = append(res, streamclient.WithGRPCKeepaliveParams(keepaliveParams))
+	}
+	return res, nil
+}
+func streamCallOptionHostPortsTranslator(config ConsulConfig) *map[string]streamcall.Option {
+	c := config.StreamCallOpt
+	if c == nil || len(*c.HostPorts) == 0 {
+		return nil
+	}
+	var res map[string]streamcall.Option
+	for name, hostPort := range *c.HostPorts {
+		res[name] = streamcall.WithHostPort(hostPort)
+	}
+	return &res
+}
+func streamCallOptionUrlsTranslator(config ConsulConfig) *map[string]streamcall.Option {
+	c := config.StreamCallOpt
+	if c == nil || len(*c.Urls) == 0 {
+		return nil
+	}
+	var res map[string]streamcall.Option
+	for name, url := range *c.Urls {
+		res[name] = streamcall.WithURL(url)
+	}
+	return &res
+}
+func streamCallOptionTagsTranslator(config ConsulConfig) *map[string]streamcall.Option {
+	c := config.StreamCallOpt
+	if c == nil || len(*c.Tags) == 0 {
+		return nil
+	}
+	var res map[string]streamcall.Option
+	for name, tag := range *c.Tags {
+		res[name] = streamcall.WithTag(tag.Key, tag.Value)
+	}
+	return &res
+}
+func streamCallOptionConnectionTimeoutTranslator(config ConsulConfig) *streamcall.Option {
+	c := config.StreamCallOpt
+	if c == nil || c.ConnectionTimeout == nil {
+		return nil
+	}
+	var res streamcall.Option
+	connectionTimeout, err := utils.ParseDuration(*c.ConnectionTimeout)
+	if err != nil {
+		return nil
+	}
+	res = streamcall.WithConnectTimeout(connectionTimeout)
+	return &res
+}
+func streamCallOptionGRPCCompressorTranslator(config ConsulConfig) *streamcall.Option {
+	c := config.StreamCallOpt
+	if c == nil || c.CompressorName == nil {
+		return nil
+	}
+	var res streamcall.Option
+	res = streamcall.WithGRPCCompressor(*c.CompressorName)
+	return &res
 }
