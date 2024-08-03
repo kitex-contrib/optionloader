@@ -1,0 +1,54 @@
+mux_transport: true
+read_write_timeout:
+  unit: s
+  value: 30
+exit_wait_time:
+  unit: s
+  value: 10
+max_conn_idle_time:
+  unit: s
+  value: 60
+stats_level: 1
+service_addr:
+  network: tcp
+  address: 127.0.0.1:8080
+grpc_write_buffer_size: 1024
+grpc_read_buffer_size: 1024
+grpc_initial_window_size: 1024
+grpc_initial_conn_window_size: 1024
+grpc_keepalive_params:
+  max_connection_idle:
+    unit: s
+    value: 60
+  max_connection_age:
+    unit: s
+    value: 300
+  max_connection_age_grace:
+    unit: s
+    value: 300
+  time:
+    unit: s
+    value: 120
+  timeout:
+    unit: s
+    value: 20
+grpc_keepalive_enforcement_policy:
+  min_time:
+    unit: s
+    value: 10
+  permit_without_stream: true
+grpc_max_concurrent_streams: 100
+grpc_max_header_list_size: 1024
+context_backup:
+  enable: true
+  async: true
+refuse_traffic_without_service_name: true
+enable_context_timeout: true
+server_basic_info:
+  server_name: skywalking
+  method: skywalking
+  tags:
+    version: 8.0.0
+    endpoint: /skywalking
+reuse_port: true
+compatible_middleware_for_unary: true

@@ -1,0 +1,13 @@
+host_port: "localhost:8080"
+url: "/your-service-name/your-method"
+http_host: "your-destination-service-name"
+rpc_timeout:
+  unit: "s"
+  value: 5
+connect_timeout:
+  unit: "s"
+  value: 3
+tag:
+  key: "your-tag-key"
+  value: "your-tag-value"
+grpc_compressor: "gzip"
